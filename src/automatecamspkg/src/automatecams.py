@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # import sys
 # sys.path.append('/usr/local/lib/python3.7/site-packages')
 import time
@@ -27,7 +27,9 @@ class automation():
         # webcam.set(cv.CAP_PROP_FPS, self.fps)
         webcam.set(cv.CAP_PROP_FPS, 30)
         # webcam_writer = cv.VideoWriter('webcam2/webcam*.mp4',cv.VideoWriter_fourcc(*'mp4v'),self.fps,(640,480))
-        webcam_writer = cv.VideoWriter('webcam2/webcam*.mp4',cv.VideoWriter_fourcc(*'mp4v'),30,(640,480))
+        webcam_writer = cv.VideoWriter('outputs/webcam/webcam*.mp4',cv.VideoWriter_fourcc(*'mp4v'),30,(640,480))
+
+        timestamp = []
 
         # for counter in range(self.tot_frames): 
         for counter in range(30*2*60):
@@ -36,6 +38,8 @@ class automation():
             webcam_writer.write(frame)
             cv.imshow('Webcam Binary',frame)
 
+            timestamp.append(time.time())
+
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
                 break    
@@ -43,6 +47,9 @@ class automation():
         webcam_writer.release()
         cv.destroyAllWindows()
 
+        # save timestamps as csv 
+        np.savetxt('outputs/webcam/timestamp*.csv', timestamp, delimiter=',')
+        
     def fibrescope_execute(self):
         print("Fibrescope execution selected")
         
@@ -63,13 +70,17 @@ class automation():
         fibre_writer = cv.VideoWriter('fibrescope2/videos/fibrescope*.mp4',cv.VideoWriter_fourcc(*'mp4v'),self.fps,(fibrescope.Width.GetValue(),fibrescope.Height.GetValue()))
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         
+        timestamp = []
         for counter in range(self.tot_frames):
             # do the thing
             ret, frame = fibrescope.RetrieveResult(5000, pylon.GrabStrategy_LatestImageOnly)
             if not ret: break
-            frame = automation.filter_frame_fibrescope(frame) # bonarize frame
+            # frame = automation.filter_frame_fibrescope(frame) # bonarize frame
             fibre_writer.write(frame)
             cv.imshow('Fibrescope Binary',frame)
+
+            timestamp.append(time.time())
+
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
                 break
@@ -78,6 +89,9 @@ class automation():
         fibre_writer.release()
         cv.destroyAllWindows()
         
+        # save timestamps as csv
+        np.savetxt('outputs/fibrescope/timestamp*.csv', timestamp, delimiter=',')
+
     def robot_setup(self):
         print("Bringing end-effector to position for set-up.")
         pub = rospy.Publisher('joint_demand', Float32MultiArray, queue_size=10)
