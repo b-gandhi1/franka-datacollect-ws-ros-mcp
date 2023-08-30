@@ -1,0 +1,5 @@
+franka_ros/franka_description
+/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_description/cmake.lock /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock
+/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_description/lib/pkgconfig/franka_description.pc /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/franka_description.pc
+/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_description/share/franka_description/cmake/franka_descriptionConfig.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/franka_description/cmake/franka_descriptionConfig.cmake
+/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_description/share/franka_description/cmake/franka_descriptionConfig-version.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/franka_description/cmake/franka_descriptionConfig-version.cmake

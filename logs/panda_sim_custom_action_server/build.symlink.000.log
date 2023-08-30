@@ -1,0 +1,13 @@
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/panda_sim_custom_action_server/start_joint_trajectory_server.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/panda_sim_custom_action_server/start_gripper_action_server.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/panda_sim_custom_action_server/cmake.lock
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/panda_sim_custom_action_server.pc
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/python3/dist-packages/panda_sim_custom_action_server/__init__.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/python3/dist-packages/panda_sim_custom_action_server/cfg/__init__.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/python3/dist-packages/panda_sim_custom_action_server/cfg/PandaPositionFFJointTrajectoryActionServerConfig.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_sim_custom_action_server/cmake/panda_sim_custom_action_serverConfig.cmake
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_sim_custom_action_server/cmake/panda_sim_custom_action_serverConfig-version.cmake
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_sim_custom_action_server/docs/PandaPositionFFJointTrajectoryActionServerConfig-usage.dox
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_sim_custom_action_server/docs/PandaPositionFFJointTrajectoryActionServerConfig.dox
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_sim_custom_action_server/docs/PandaPositionFFJointTrajectoryActionServerConfig.wikidoc
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/include/panda_sim_custom_action_server/PandaPositionFFJointTrajectoryActionServerConfig.h

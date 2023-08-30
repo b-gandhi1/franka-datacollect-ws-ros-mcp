@@ -3,3 +3,10 @@ mcp_datacollect_env
 src/automatecamspkg/src/outputs
 build
 devel
+src/panda_simulator
+src/franka_panda_description
+src/franka_ros
+src/franka_ros_interface
+src/orocos_kinematics_dynamics
+src/panda_moveit_config
+src/panda_robot

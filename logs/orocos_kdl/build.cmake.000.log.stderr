@@ -1,0 +1,18 @@
+[0mCMake Deprecation Warning at CMakeLists.txt:4 (CMAKE_MINIMUM_REQUIRED):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+[0m
+[33mCMake Warning (dev) at src/CMakeLists.txt:104 (ADD_LIBRARY):
+  Policy CMP0115 is not set: Source file extensions must be explicit.  Run
+  "cmake --help-policy CMP0115" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+  File:
+
+    /home/bhoomika/franka-datacollect-ws-ros-mcp/src/orocos_kinematics_dynamics/orocos_kdl/src/config.h.in
+This warning is for project developers.  Use -Wno-dev to suppress it.
+[0m

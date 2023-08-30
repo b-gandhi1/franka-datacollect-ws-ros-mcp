@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# above line is compulsary for ROS environments only. 
 # -*- coding: utf-8 -*-
 # import sys
 # sys.path.append('/usr/local/lib/python3.7/site-packages')
@@ -16,6 +17,22 @@ class automation():
         self.tot_frames = 30*2*60 # 30 fps, 2 mins.
         self.fps = 30 # 30 fps
         print('init executed ---------------------------')
+
+    def arduino_pressure_callback(self,data): # pressure value check
+        rospy.loginfo(rospy.get_caller_id() + "Pressure value %s", data.data)
+        # self.pressure_snsr_val = data
+
+    def arduino_pumpstatus_callback(self,data): # pump status check
+        rospy.loginfo(rospy.get_caller_id() + "Pump status %s", data.data)
+        # self.pump_state = data
+
+    def arduino_sub(self): # subscriber for arduino pressure sensor
+
+        rospy.init_node('arduino_vals', anonymous=True)
+        self.pressure_snsr_val = rospy.Subscriber("pressure_val", Float32MultiArray, automation.arduino_pressure_callback)
+        self.pump_state = rospy.Subscriber("pump_state", Float32MultiArray, automation.arduino_pumpstatus_callback)
+        # spin() simply keeps python from exiting until this node is stopped
+        rospy.spin()
  
     def webcam_execute(self):
         print("Webcam execution selected.")
@@ -30,6 +47,9 @@ class automation():
         webcam_writer = cv.VideoWriter('outputs/webcam/webcam*.mp4',cv.VideoWriter_fourcc(*'mp4v'),30,(640,480))
 
         timestamp = []
+        pressure = []
+        polaris = []
+        frankajnt = []
 
         # for counter in range(self.tot_frames): 
         for counter in range(30*2*60):
@@ -39,6 +59,10 @@ class automation():
             cv.imshow('Webcam Binary',frame)
 
             timestamp.append(time.time())
+            pressure_val = np.array(self.pressure_snsr_val,self.pump_state)
+            pressure.append(pressure_val)
+            polaris.append(self.polaris_pos)
+            frankajnt.append(self.franka_pos)
 
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
@@ -48,7 +72,8 @@ class automation():
         cv.destroyAllWindows()
 
         # save timestamps as csv 
-        np.savetxt('outputs/webcam/timestamp*.csv', timestamp, delimiter=',')
+        header = ['counter', 'timestamp', 'pressure', 'polaris','','','','','', 'franka_jnt']
+        np.savetxt('outputs/webcam/timestamp*.csv', np.array(counter, timestamp, pressure, polaris, frankajnt), header=header, delimiter=',')
         
     def fibrescope_execute(self):
         print("Fibrescope execution selected")
@@ -71,6 +96,10 @@ class automation():
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         
         timestamp = []
+        pressure = []
+        polaris = []
+        frankajnt = []
+
         for counter in range(self.tot_frames):
             # do the thing
             ret, frame = fibrescope.RetrieveResult(5000, pylon.GrabStrategy_LatestImageOnly)
@@ -80,6 +109,10 @@ class automation():
             cv.imshow('Fibrescope Binary',frame)
 
             timestamp.append(time.time())
+            pressure_val = np.array(self.pressure_snsr_val,self.pump_state)
+            pressure.append(pressure_val)
+            polaris.append(self.polaris_pos)
+            frankajnt.append(self.franka_pos)
 
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
@@ -90,61 +123,30 @@ class automation():
         cv.destroyAllWindows()
         
         # save timestamps as csv
-        np.savetxt('outputs/fibrescope/timestamp*.csv', timestamp, delimiter=',')
+        header = ['counter', 'timestamp', 'pressure', 'polaris','','','','','', 'franka_jnt']
+        np.savetxt('outputs/fibrescope/timestamp*.csv', np.array(counter, timestamp, pressure, polaris, frankajnt),header=header, delimiter=',')
 
-    def robot_setup(self):
-        print("Bringing end-effector to position for set-up.")
-        pub = rospy.Publisher('joint_demand', Float32MultiArray, queue_size=10)
-        rospy.init_node('Mover6Pub', anonymous=True)
-        rate = rospy.Rate(1/3) # 1/3 hz
-        while not rospy.is_shutdown():
-            jnt_val = Float32MultiArray()
-            jnt_val.data = [0,0,0,0,60,0] # home, wrist down
-            pub.publish(jnt_val)
-            rate.sleep()
+    def franka_callback(self,data):
+        rospy.loginfo(rospy.get_caller_id(), "Franka End Effector Position: %s", data.data)
+        # self.franka_pos = data # ground truth
 
-            jnt_val.data = [0,0,0,0,0,0] # change to align axes 
-            pub.publish(jnt_val)
-            rate.sleep()
-            print("End-effector alignment complete")
-            break
-        
-        self.gripper_ready = input('Adjust gripper from rviz and PRESS Y/y when ready:')
-    def robot_test(self): 
-        print("This is case three: Test robot")
-        pub = rospy.Publisher('joint_demand', Float32MultiArray, queue_size=10)
-        rospy.init_node('Mover6Pub', anonymous=True)
-
-        rate = rospy.Rate(1/3) # 1/3 hz
-        while not rospy.is_shutdown():
-            jnt_val = Float32MultiArray()
-
-            if self.gripper_ready == 'Y' or 'y':
-                # jnt_val.data = [0,0,0,0,np.deg2rad(84),0]
-                jnt_val.data = [0,0,0,0,np.deg2rad(80),0] # move len/2
-                pub.publish(jnt_val)
-                rate.sleep()
-
-                for i in range(10):
-                    jnt_val.data = [0,np.deg2rad(15),np.deg2rad(40),0,np.deg2rad(30),0] # move -len
-                    pub.publish(jnt_val)
-                    rate.sleep()
-                    jnt_val.data = [0,np.deg2rad(30),np.deg2rad(20),0,np.deg2rad(35),0] # move len
-                    pub.publish(jnt_val)
-                    rate.sleep()
-                    print('Iteration: ',i+1)
-                jnt_val.data = [0,0,0,0,0,0] # move -len/2
-                print('Finished. i= ',i+1) # check for loop execution
-                break
-    def polaris_callback(data):
-        rospy.loginfo(rospy.get_caller_id(), data.data)
-        rospy.init_node()
-    def polaris_sub():
-        # polaris ros subscriber, use this to automate recording and saving. 
-        print('Polaris system selected')
-        rospy.init_node('polaris_tracker', anonymous=True)
-        rospy.Subscriber('polaris_data', Float32MultiArray, automation.polaris_callback) # topic name = polaris_data - needs to be same in publisher too.
+    def franka_sub(self): # subscriber for franka emika robot arm
+        # subscribe to topic from ros2, use bridge. 
+        rospy.init_node('frankaemika', anonymous=True)
+        self.franka_pos = rospy.Subscriber('franka_ee_pos', Float32MultiArray, automation.franka_callback)
         rospy.spin()
+
+    def polaris_callback(self,data):
+        rospy.loginfo(rospy.get_caller_id(), data.data)
+        # self.polaris_pos = data
+
+    def polaris_sub(self): # state of the art comparison, also ground truth backup. 
+        rospy.init_node('polaris', anonymous=True)
+        rospy.init_node('polaris_tracker', anonymous=True)
+        self.polaris_pos = rospy.Subscriber('polaris_data', Float32MultiArray, automation.polaris_callback) # topic name = polaris_data - needs to be same in publisher too.
+        
+        rospy.spin()
+        
     def wrong_input():
         print("This is the default case. Input not recognised, please try again.")
         
@@ -153,22 +155,39 @@ def main():
     switcher = {
         1: automation.webcam_execute,
         2: automation.fibrescope_execute,
-        3: automation.polaris_sub,
-        4: automation.robot_test,    
+        # 3: automation.polaris_sub,
     }
-    case_number = int(input('Enter input number: 1 - webcam; 2 - fibrescope; 3 - Test robot.'))
+    case_number = int(input('Enter input number: 1 - webcam; 2 - fibrescope.'))
     # case_number = 1
     # get the function from switcher dictionary
     # if the case number is not found, default to case_default
     chosen_case = switcher.get(case_number, automation.wrong_input)
 
-    # execute the chosen function
-    chosen_case(())
+    chosen_case()
+
+    # # begin multi process to run chosen_case and polaris together: 
+    # polaris_process = mp.Process(target=automation.polaris_sub)
+    # cam_process = mp.Process(target=chosen_case)
+    # try: 
+    #     # start multi process: 
+    #     polaris_process.start()
+    #     cam_process.start()
+
+    #     # finish multi process: 
+    #     polaris_process.join()
+    #     cam_process.join()
+
+    #     print('Multi-processes finished.')
+    # except KeyboardInterrupt:
+    #     print('*****ERROR: Manually interrupted*****')
+    #     pass
     print('main executed -----------------------')
 
 if __name__ == '__main__':
     main()
+    automation.polaris_sub()
+    automation.arduino_sub()
+    automation.franka_sub()
     print('main TO BE executed -----------------------')
-    # use multiprocessing to run mcp tracker and polaris in parallel
 
     

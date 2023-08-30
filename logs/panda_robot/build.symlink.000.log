@@ -1,0 +1,7 @@
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/panda_robot.pc
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/python3/dist-packages/panda_robot/__init__.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/panda_robot/panda_robot.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/panda_robot/cmake.lock
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/panda_robot/demo_endeffector_keyboard.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_robot/cmake/panda_robotConfig-version.cmake
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_robot/cmake/panda_robotConfig.cmake

@@ -1,0 +1,7 @@
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/franka_moveit.pc
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/python3/dist-packages/franka_moveit/__init__.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/franka_moveit/test_scene_interface.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/franka_moveit/create_demo_planning_scene.py
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/franka_moveit/cmake.lock
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/franka_moveit/cmake/franka_moveitConfig.cmake
+Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/franka_moveit/cmake/franka_moveitConfig-version.cmake
