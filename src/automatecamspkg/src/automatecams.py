@@ -27,13 +27,12 @@ class automation():
         # self.pump_state = data
 
     def arduino_sub(self): # subscriber for arduino pressure sensor
-
         rospy.init_node('arduino_vals', anonymous=True)
         self.pressure_snsr_val = rospy.Subscriber("pressure_val", Float32MultiArray, automation.arduino_pressure_callback)
         self.pump_state = rospy.Subscriber("pump_state", Float32MultiArray, automation.arduino_pumpstatus_callback)
         # spin() simply keeps python from exiting until this node is stopped
         rospy.spin()
- 
+
     def webcam_execute(self):
         print("Webcam execution selected.")
         webcam = cv.VideoCapture(2) # usb webcam
@@ -72,7 +71,7 @@ class automation():
         cv.destroyAllWindows()
 
         # save timestamps as csv 
-        header = ['counter', 'timestamp', 'pressure', 'polaris','','','','','', 'franka_jnt']
+        header = ['Counter','Timestamp','Pressure (kPa)','Polaris Tx','Polaris Ty','Polaris Tz','Polaris Error','Polaris Q0','Polaris Qx','Polaris Qy','Polaris Qz','Franka EE','','','','','','','']
         np.savetxt('outputs/webcam/timestamp*.csv', np.array(counter, timestamp, pressure, polaris, frankajnt), header=header, delimiter=',')
         
     def fibrescope_execute(self):
@@ -80,20 +79,22 @@ class automation():
         
         fibrescope = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
         print("Using device ", fibrescope.GetDeviceInfo().GetModelName())
+        fibrescope.Open() # is this needed?? 
         fibrescope.Width.SetValue(640)
         fibrescope.Height.SetValue(480)
         # also need to set other setting values... Gain and exposure. 
         # !!!
         # others keep default
-        fibrescope.Open() # Open the camera 
-        fibrescope.AcquisitionMode.SetValue('SingleFrame')
-        fibrescope.StartGrabbing(pylon.GrabStrategy_OneByOne)
-        self.ref_frame = fibrescope.RetrieveResult()
-        fibrescope.StopGrabbing()
-        time.sleep(2)
+        # fibrescope.Open() # Open the camera 
+        # fibrescope.AcquisitionMode.SetValue('SingleFrame')
+        # fibrescope.StartGrabbing(pylon.GrabStrategy_OneByOne)
+        # self.ref_frame = fibrescope.RetrieveResult()
+        # fibrescope.StopGrabbing()
+        # time.sleep(2)
         fibrescope.AcquisitionFrameRateAbs.SetValue(self.fps)
         fibre_writer = cv.VideoWriter('fibrescope2/videos/fibrescope*.mp4',cv.VideoWriter_fourcc(*'mp4v'),self.fps,(fibrescope.Width.GetValue(),fibrescope.Height.GetValue()))
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
+        converter = pylon.ImageFormatConverter()
         
         timestamp = []
         pressure = []
@@ -101,30 +102,33 @@ class automation():
         frankajnt = []
 
         for counter in range(self.tot_frames):
+            # if not ret: break
             # do the thing
-            ret, frame = fibrescope.RetrieveResult(5000, pylon.GrabStrategy_LatestImageOnly)
-            if not ret: break
+            frame = fibrescope.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+            # if not ret: break
+            if frame.GrabSucceeded():
+                frame = converter.Convert(frame)
             # frame = automation.filter_frame_fibrescope(frame) # bonarize frame
-            fibre_writer.write(frame)
-            cv.imshow('Fibrescope Binary',frame)
+                img = frame.GetArray()
+                fibre_writer.write(img)
+                cv.imshow('Recording',img)
 
-            timestamp.append(time.time())
-            pressure_val = np.array(self.pressure_snsr_val,self.pump_state)
-            pressure.append(pressure_val)
-            polaris.append(self.polaris_pos)
-            frankajnt.append(self.franka_pos)
+                timestamp.append(time.time())
+                # pressure_val = np.array(self.pressure_snsr_val,self.pump_state)
+                # pressure.append(pressure_val)
+                # polaris.append(self.polaris_pos)
+                # frankajnt.append(self.franka_pos)
 
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
                 break
-        
         fibrescope.StopGrabbing()
         fibre_writer.release()
         cv.destroyAllWindows()
         
         # save timestamps as csv
-        header = ['counter', 'timestamp', 'pressure', 'polaris','','','','','', 'franka_jnt']
-        np.savetxt('outputs/fibrescope/timestamp*.csv', np.array(counter, timestamp, pressure, polaris, frankajnt),header=header, delimiter=',')
+        # header = ['Counter','Timestamp','Pressure (kPa)','Polaris Tx','Polaris Ty','Polaris Tz','Polaris Error','Polaris Q0','Polaris Qx','Polaris Qy','Polaris Qz','Franka EE','','','','','','','']
+        # np.savetxt('outputs/fibrescope/timestamp*.csv', np.array(counter, timestamp, pressure, polaris, frankajnt),header=header,delimiter=',')
 
     def franka_callback(self,data):
         rospy.loginfo(rospy.get_caller_id(), "Franka End Effector Position: %s", data.data)
@@ -163,7 +167,7 @@ def main():
     # if the case number is not found, default to case_default
     chosen_case = switcher.get(case_number, automation.wrong_input)
 
-    chosen_case()
+    chosen_case(automation())
 
     # # begin multi process to run chosen_case and polaris together: 
     # polaris_process = mp.Process(target=automation.polaris_sub)
@@ -186,7 +190,7 @@ def main():
 if __name__ == '__main__':
     main()
     automation.polaris_sub()
-    automation.arduino_sub()
+    # automation.arduino_sub()
     automation.franka_sub()
     print('main TO BE executed -----------------------')
 
