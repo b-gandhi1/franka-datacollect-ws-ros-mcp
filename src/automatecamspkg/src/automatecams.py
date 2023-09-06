@@ -11,15 +11,18 @@ import numpy as np
 import cv2 as cv
 # from pypylon_opencv_viewer import BaslerOpenCVViewer # might be unecessary
 from pypylon import pylon
-# from imageio import get_writer # video writer for pylon
+from pypylon import genicam
+from imageio import get_writer # video writer for pylon
 import imageio.v3 as iio
+# import imageio.v3 as iio
 
 print('imports done successfully!')
+
 class automation():
     def __init__(self):
         # self.tot_frames = 30*2*60 # 30 fps, 2 mins.
         self.tot_frames = 30*5 # 5 secs
-        self.fps = 30 # 30 fps
+        self.fps = 30.00 # 30 fps
         self.desiredwidth = 640
         self.desiredheight = 480
         print('init executed ---------------------------')
@@ -82,7 +85,22 @@ class automation():
     def fibrescope_execute(self):
         print("Fibrescope execution selected")
         
-        fibrescope = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
+        # method 1
+        # tlFactory = pylon.TlFactory.GetInstance()
+        # devices = tlFactory.EnumerateDevices()
+        # print(f"devices: {devices}")
+        # fibrescope = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
+
+        #method2
+        tlf = pylon.TlFactory.GetInstance()
+        # tl = tlf.CreateTl('BaslerGigE')
+        # fib_info = tl.CreateDeviceInfo()
+        fib_info = pylon.DeviceInfo()
+        fib_info.SetIpAddress('169.254.27.123')
+        fibrescope = pylon.InstantCamera(tlf.CreateDevice(fib_info))
+        
+        # same error with both methods ... 
+        
         print("Using device ", fibrescope.GetDeviceInfo().GetModelName())
         fibrescope.Open() 
         # set some basic parameters
@@ -92,6 +110,7 @@ class automation():
         fibrescope.GainAuto.SetValue('Off')
         fibrescope.GainRaw.SetValue(200)
         fibrescope.ExposureTimeAbs = 90000
+        fibrescope.AcquisitionMode.SetValue("Continuous")
         # fibrescope.UserSetSelector = "UserSetMCP"
         # fibrescope.UserSetSave.Execute()
         # fibrescope.UserSetDefaultSelector = "UserSetMCP"
@@ -101,7 +120,7 @@ class automation():
         # others keep default
         
         # fibre_writer = cv.VideoWriter('src/automatecamspkg/src/outputs/fibrescope/fibrescope.mp4',cv.VideoWriter_fourcc(*'mp4v'),self.fps,(self.desiredwidth,self.desiredheight),True)
-        fibre_writer = iio.get_writer('src/automatecamspkg/src/outputs/fibrescope/fibrescope.mp4', fps=self.fps)
+        fibre_writer = get_writer('src/automatecamspkg/src/outputs/fibrescope/fibrescope.mp4', fps=self.fps) # imageio
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
 
         timestamp = []
@@ -167,11 +186,11 @@ class automation():
     
 def main():
     switcher = {
-        1: automation.webcam_execute,
-        2: automation.fibrescope_execute,
+        'w': automation.webcam_execute,
+        'f': automation.fibrescope_execute,
         # 3: automation.polaris_sub,
     }
-    case_number = int(input('Enter input number: 1 - webcam; 2 - fibrescope.'))
+    case_number = input("Enter relevant letter for camera selection: 'w' - webcam; 'f' - fibrescope : ")
     # case_number = 1
     # get the function from switcher dictionary
     # if the case number is not found, default to case_default
