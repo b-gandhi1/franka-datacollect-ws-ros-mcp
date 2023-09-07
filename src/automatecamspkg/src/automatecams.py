@@ -12,9 +12,6 @@ import cv2 as cv
 # from pypylon_opencv_viewer import BaslerOpenCVViewer # might be unecessary
 from pypylon import pylon
 from pypylon import genicam
-from imageio import get_writer # video writer for pylon
-import imageio.v3 as iio
-# import imageio.v3 as iio
 
 print('imports done successfully!')
 
@@ -119,8 +116,7 @@ class automation():
         # !!!
         # others keep default
         
-        # fibre_writer = cv.VideoWriter('src/automatecamspkg/src/outputs/fibrescope/fibrescope.mp4',cv.VideoWriter_fourcc(*'mp4v'),self.fps,(self.desiredwidth,self.desiredheight),True)
-        fibre_writer = get_writer('src/automatecamspkg/src/outputs/fibrescope/fibrescope.mp4', fps=self.fps) # imageio
+        fibre_writer = cv.VideoWriter('src/automatecamspkg/src/outputs/fibrescope/fibrescope.mp4',cv.VideoWriter_fourcc(*'mp4v'),self.fps,(self.desiredwidth,self.desiredheight),True)
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
 
         timestamp = []
@@ -129,16 +125,12 @@ class automation():
         frankajnt = []
 
         for counter in range(self.tot_frames):
-            # if not ret: break
-            # do the thing
             frame = fibrescope.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
             if frame.GrabSucceeded():
                 img = frame.Array
-                cv.imshow('Fibrescope recording',img)
-                # fibre_writer.write(img) # saving video
-                im = iio.imread(img) # imageio
-                im.reshape((self.desiredheight,self.desiredwidth)) # imageio, needs resizing, width height order inverted. 
-                fibre_writer.append_data(im) # imageio
+                bgr_img = cv.cvtColor(img,cv.COLOR_GRAY2BGR) # THIS IS NECESSARY FOR PLAYABLE VIDEO VIA OPENCV!!
+                cv.imshow('Fibrescope recording',bgr_img)
+                fibre_writer.write(bgr_img) # saving video
                 
                 timestamp.append(time.time())
                 # pressure_val = np.array(self.pressure_snsr_val,self.pump_state)
@@ -149,8 +141,7 @@ class automation():
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
                 break
-        # fibre_writer.release()
-        fibre_writer.close() # imageio 
+        fibre_writer.release()
         fibrescope.StopGrabbing()
         fibrescope.Close()
         cv.destroyAllWindows()
@@ -218,9 +209,9 @@ def main():
 
 if __name__ == '__main__':
     main()
-    automation.polaris_sub()
+    # automation.polaris_sub()
     # automation.arduino_sub()
-    automation.franka_sub()
+    # automation.franka_sub()
     print('main TO BE executed -----------------------')
 
     
