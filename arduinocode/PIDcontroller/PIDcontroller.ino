@@ -7,9 +7,10 @@ ros::NodeHandle nh;
 
 // ROS publisher define
 // publishing pump state (output) and pressure value (input) 
-std_msgs::Float32 msg;
-ros::Publisher pump_state("pump_state",&msg); // MODIFY
-ros::Publisher pressure_val("pressure_val",&msg);
+std_msgs::Float32 msg1;
+std_msgs::Float32 msg2;
+ros::Publisher pump_state("pump_state",&msg1);
+ros::Publisher pressure_val("pressure_val",&msg2);
 
 //PID constants
 double kp = 2;
@@ -44,10 +45,12 @@ float voltP;
 float kPa;
 // variable to publish
 float pump_state_est;
+const float Setpoint = 6; // kPa
 
 void setup() {
+  int baudrate = 9600;
   setPoint = 5; //5 kPa
-  Serial.begin( 9600 );
+  Serial.begin( baudrate );
   pinMode( VALVE_DIR, OUTPUT );
   pinMode( VALVE_PWM, OUTPUT );
   pinMode( PUMP_DIR, OUTPUT );
@@ -60,6 +63,7 @@ void setup() {
   
   // ROS setup
   nh.initNode();
+  nh.getHardware()->setBaud(baudrate);
   nh.advertise(pump_state);
   nh.advertise(pressure_val);
   
@@ -85,14 +89,13 @@ void loop() {
   digitalWrite(PUMP_PWM, pump_state_est); // apply speed based on sensor feedback
   
   // Publish to ROS
-//  pump_state_pub.data = pump_state;
-//  pump_state.pump_state = pump_state_est;
-//  kPa_pub.data = kPa;
-//  pressure_val.pressure_val = kPa;
-  pump_state.publish(pump_state_est);
-  pressure_val.publish(kPa);
+  msg1.data = pump_state_est;
+  pump_state.publish(&msg1);
+  msg2.data = kPa;
+  pressure_val.publish(&msg2);
 
   nh.spinOnce();
+  delay(10);
 }
 
 double computePID(double inp) {
@@ -108,7 +111,7 @@ double computePID(double inp) {
   lastError = error; //remember current error
   previousTime = currentTime; //remember current time
 
-  if error <= 0.25
+  if (error <= 0.25)
     {
       // close valve
       digitalWrite(VALVE_PWM, LOW);
