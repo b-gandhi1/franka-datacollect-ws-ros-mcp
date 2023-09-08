@@ -6,7 +6,7 @@
 import time
 import multiprocessing as mp
 import rospy
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Float32MultiArray
 import numpy as np
 import cv2 as cv
 from pypylon import pylon
@@ -28,18 +28,23 @@ class automation():
 
     def arduino_pressure_callback(self,data): # pressure value check
         rospy.loginfo(rospy.get_caller_id() + "Pressure value %s", data.data)
-        self.pressure_snsr_val = data.data
+        global pressure_snsr_val
+        pressure_snsr_val = data.data
 
     def arduino_pumpstatus_callback(self,data): # pump status check
         rospy.loginfo(rospy.get_caller_id() + "Pump status %s", data.data)
-        self.pump_state = data.data
+        global pump_state
+        pump_state = data.data
 
     def arduino_sub(self): # subscriber for arduino pressure sensor
-        rospy.init_node('arduino_vals', anonymous=True)
-        rospy.Subscriber("pressure_val", Float32, self.arduino_pressure_callback)
-        rospy.Subscriber("pump_state", Float32, self.arduino_pumpstatus_callback)
-        # spin() simply keeps python from exiting until this node is stopped
-        rospy.spin()
+        try:
+            rospy.init_node('arduino_vals', anonymous=True)
+            rospy.Subscriber("pressure_val", Float32, self.arduino_pressure_callback)
+            rospy.Subscriber("pump_state", Float32, self.arduino_pumpstatus_callback)
+            # spin() simply keeps python from exiting until this node is stopped
+            rospy.spin()
+        except rospy.ROSInterruptException:
+            exit()
 
     def webcam_execute(self):
         print("Webcam execution selected.")
@@ -66,7 +71,7 @@ class automation():
             cv.imshow('Webcam recording',frame)
             
             timestamp.append(time.time())
-            pressure_val = np.array(self.pressure_snsr_val,self.pump_state)
+            pressure_val = np.array(pressure_snsr_val,pump_state)
             pressure.append(pressure_val)
             # polaris.append(self.polaris_pos)
             # frankajnt.append(self.franka_pos)
@@ -143,7 +148,7 @@ class automation():
                 fibre_writer.write(bgr_img) # saving video
                 
                 timestamp.append(time.time())
-                pressure_val = np.array(self.pressure_snsr_val,self.pump_state)
+                pressure_val = np.array(pressure_snsr_val,pump_state)
                 pressure.append(pressure_val)
                 # polaris.append(self.polaris_pos)
                 # frankajnt.append(self.franka_pos)
@@ -165,24 +170,30 @@ class automation():
         # np.savetxt('src/outputs/fibrescope/trialsave.csv', np.array(counter, timestamp, pressure),header=header,delimiter=',')
     def franka_callback(self,data):
         rospy.loginfo(rospy.get_caller_id(), "Franka End Effector Position: %s", data.data)
-        # self.franka_pos = data # ground truth
+        global franka_pos # ground truth
+        franka_pos = data # ground truth
 
     def franka_sub(self): # subscriber for franka emika robot arm
         # subscribe to topic from ros2, use bridge. 
-        rospy.init_node('frankaemika', anonymous=True)
-        self.franka_pos = rospy.Subscriber('franka_ee_pos', Float32MultiArray, automation.franka_callback)
-        rospy.spin()
+        try:
+            rospy.init_node('frankaemika', anonymous=True)
+            rospy.Subscriber('franka_ee_pos', Float32MultiArray, automation.franka_callback)
+            rospy.spin()
+        except rospy.ROSInterruptException:
+            exit()
 
     def polaris_callback(self,data):
         rospy.loginfo(rospy.get_caller_id(), data.data)
-        # self.polaris_pos = data
+        global polaris_pos
+        polaris_pos = data
 
     def polaris_sub(self): # state of the art comparison, also ground truth backup. 
-        rospy.init_node('polaris', anonymous=True)
-        rospy.init_node('polaris_tracker', anonymous=True)
-        self.polaris_pos = rospy.Subscriber('polaris_data', Float32MultiArray, automation.polaris_callback) # topic name = polaris_data - needs to be same in publisher too.
-        
-        rospy.spin()
+        try: 
+            rospy.init_node('polaris', anonymous=True)
+            rospy.Subscriber('polaris_data', Float32MultiArray, automation.polaris_callback) # topic name = polaris_data - needs to be same in publisher too.
+            rospy.spin() 
+        except rospy.ROSInterruptException:
+            exit()
         
     def wrong_input():
         print("This is the default case. Input not recognised, please try again.")
