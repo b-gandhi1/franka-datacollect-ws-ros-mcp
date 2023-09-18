@@ -1,0 +1,10 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/project/catkin_wsbaslin/devel/lib/python3/dist-packages",
+        "/home/project/Zihan/catkin_ws/devel/lib/python3/dist-packages",
+        "/home/project/catkin_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "/home/project/catkin_wsbaslin/devel/lib/python3/dist-packages",
+        "/home/project/catkin_ws2/devel/lib/python3/dist-packages"
+    ]
+}

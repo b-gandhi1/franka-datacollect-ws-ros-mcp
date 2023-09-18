@@ -19,11 +19,11 @@ void loop() {
   // convert ASCII to voltage
   voltP = (air_pressure_val*5)/1024;
 
-  Serial.println(voltP);
+//  Serial.println(voltP);
   // convert to kPa
   kPa = voltP * (3/2) - (3/4); 
 
-//  Serial.println(kPa);
-//  delay(1000);
+  Serial.println(kPa);
+  delay(100);
   
 }

@@ -1,17 +1,17 @@
 // ROS ingration
-#include <ros.h>
-#include <std_msgs/Float32.h>
-#include <std_msgs/String.h>
+//#include <ros.h>
+//#include <std_msgs/Float32.h>
+//#include <std_msgs/String.h>
 
 // ROS node handle
-ros::NodeHandle nh;
+//ros::NodeHandle nh;
 
 // ROS publisher define
 // publishing pump state (output) and pressure value (input) 
-std_msgs::Float32 msg1;
-std_msgs::String msg2;
-ros::Publisher chatter1("pump_state",&msg1);
-ros::Publisher chatter2("pressure_val",&msg2);
+//std_msgs::String msg1;
+//std_msgs::Float32 msg2;
+//ros::Publisher chatter1("pump_state",&msg1);
+//ros::Publisher chatter2("pressure_val",&msg2);
 
 String pump_state = "";
 
@@ -27,24 +27,29 @@ String pump_state = "";
 #define PUMP_PWM HG7881_A_IB
 #define PUMP_DIR HG7881_A_IA
 
+#define pressure_pin A0 // A0 for pressure sensor 
+
+double pressure_val;
+
 void setup()
 {
   int baudrate = 9600;
   Serial.begin(baudrate);
-  pinMode( VALVE_DIR, OUTPUT );
-  pinMode( VALVE_PWM, OUTPUT );
-  pinMode( PUMP_DIR, OUTPUT );
-  pinMode( PUMP_PWM, OUTPUT );
-  digitalWrite( VALVE_DIR, HIGH );
-  digitalWrite( VALVE_PWM, HIGH );
-  digitalWrite( PUMP_DIR, LOW);
-  digitalWrite( PUMP_PWM, LOW);
+  pinMode(pressure_pin, INPUT);
+  pinMode(VALVE_DIR, OUTPUT);
+  pinMode(VALVE_PWM, OUTPUT);
+  pinMode(PUMP_DIR, OUTPUT);
+  pinMode(PUMP_PWM, OUTPUT);
+  digitalWrite(VALVE_DIR, HIGH);
+  digitalWrite(VALVE_PWM, HIGH);
+  digitalWrite(PUMP_DIR, LOW);
+  digitalWrite(PUMP_PWM, LOW);
 
   // ROS setup
-  nh.initNode();
-  nh.getHardware()->setBaud(baudrate);
-  nh.advertise(chatter1);
-  nh.advertise(chatter2);
+//  nh.initNode();
+//  nh.getHardware()->setBaud(baudrate);
+//  nh.advertise(chatter1);
+//  nh.advertise(chatter2);
 }
 
 void loop() {
@@ -61,7 +66,7 @@ void loop() {
   {
     byte c;
     // get the next character from the serial port
-    Serial.print( "?" );
+    Serial.print( "Ready. Enter your option." );
     while ( !Serial.available() )
       ; // LOOP...
     c = Serial.read();
@@ -79,6 +84,11 @@ void loop() {
         digitalWrite( PUMP_DIR, HIGH ); // direction = forward
         digitalWrite( PUMP_PWM, HIGH ); // PWM speed = slow
         isValidInput = true;
+
+        // read and print pressure value
+        pressure_val = analogRead(pressure_pin);
+        Serial.println(pressure_val);
+        
         break;
 
       case '2': // 2) Reverse
@@ -92,6 +102,11 @@ void loop() {
         digitalWrite( PUMP_DIR, LOW ); // direction = reverse
         digitalWrite( PUMP_PWM, HIGH );
         isValidInput = true;
+        
+        // read and print pressure value
+        pressure_val = analogRead(pressure_pin);
+        Serial.println(pressure_val);
+        
         break;
 
       case '3': // 3) Soft stop (preferred)
@@ -100,6 +115,11 @@ void loop() {
         digitalWrite( PUMP_DIR, LOW );
         digitalWrite( PUMP_PWM, LOW );
         isValidInput = true;
+        
+        // read and print pressure value
+        pressure_val = analogRead(pressure_pin);
+        Serial.println(pressure_val);
+        
         break;
 
       default:
@@ -108,14 +128,11 @@ void loop() {
         break;
     }
     // publish values to ROS
-    msg1.data = PUMP_PWM;
-    chatter1.publish(&msg1);
-//    nh.spin/Once(); // what does this mean?? 
-    msg2.data = pump_state;
-    chatter2.publish(&msg2);
-    
-    nh.spinOnce();
-    delay(10);
+//    msg1.data = pump_state;
+//    chatter1.publish(&msg1);
+//    
+//    nh.spinOnce();
+//    delay(10);
   } while ( isValidInput == true );
 
 }

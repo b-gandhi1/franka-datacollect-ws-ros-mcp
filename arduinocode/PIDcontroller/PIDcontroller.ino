@@ -37,29 +37,27 @@ double cumError, rateError;
 #define PUMP_DIR HG7881_A_IA
 
 // air pressure sensor
-#define air_pressure_pin A3 // pin A3 for sensing air pressure
+#define air_pressure_pin A0 // pin A0 for sensing air pressure
 
 // variables for air pressure sensor
-float air_pressure_val;
-float voltP;
-float kPa;
-// variable to publish
-float pump_state_est;
-const float Setpoint = 6; // kPa
+double air_pressure_val;
+double voltP;
+double kPa; // variable1 to publish
+double pump_state_est; // variable2 to publish
+const double Setpoint = 5.5; // kPa. Not 6 kPa since that is max saturation point for the sensor.
 
 void setup() {
-  int baudrate = 9600;
-  setPoint = 5; //5 kPa
-  Serial.begin( baudrate );
-  pinMode( VALVE_DIR, OUTPUT );
-  pinMode( VALVE_PWM, OUTPUT );
-  pinMode( PUMP_DIR, OUTPUT );
-  pinMode( PUMP_PWM, OUTPUT );
+  int baudrate = 57600;
+  Serial.begin(baudrate);
+  pinMode(VALVE_DIR, OUTPUT);
+  pinMode(VALVE_PWM, OUTPUT);
+  pinMode(PUMP_DIR, OUTPUT);
+  pinMode(PUMP_PWM, OUTPUT);
   pinMode(air_pressure_pin, INPUT);
-  digitalWrite( VALVE_DIR, HIGH );
-  digitalWrite( VALVE_PWM, HIGH );
-  digitalWrite( PUMP_DIR, LOW);
-  digitalWrite( PUMP_PWM, LOW);
+  digitalWrite(VALVE_DIR, LOW);
+  digitalWrite(VALVE_PWM, HIGH);
+  digitalWrite(PUMP_DIR, LOW);
+  digitalWrite(PUMP_PWM, LOW);
   
   // ROS setup
   nh.initNode();
@@ -68,7 +66,7 @@ void setup() {
   nh.advertise(pressure_val);
   
   delay(100);
-  digitalWrite(PUMP_DIR, HIGH); //forward for filling in air
+  digitalWrite(PUMP_DIR, LOW); //forward for filling in air
   
 }
 
@@ -84,9 +82,16 @@ void loop() {
   voltP = (air_pressure_val*5)/1024;
   // convert to kPa
   kPa = voltP * (3/2) - (3/4); 
+  
+  Serial.print("kPa: ");
+  Serial.println(kPa);
+  
   // calculate pump state needed for measured kPa
   pump_state_est = computePID(kPa); 
   digitalWrite(PUMP_PWM, pump_state_est); // apply speed based on sensor feedback
+  
+//  Serial.print("    pump: ");
+//  Serial.println(pump_state_est);
   
   // Publish to ROS
   msg1.data = pump_state_est;
@@ -111,7 +116,7 @@ double computePID(double inp) {
   lastError = error; //remember current error
   previousTime = currentTime; //remember current time
 
-  if (error <= 0.25)
+  if (error <= 0.10)
     {
       // close valve
       digitalWrite(VALVE_PWM, LOW);
