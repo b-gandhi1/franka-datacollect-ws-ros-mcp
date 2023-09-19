@@ -27,10 +27,15 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
    5. Run the bridge: `ros2 run ros1_bridge dynamic_bridge`
 8. Terminal 5 - polaris pubisher: 
    1. run polaris publisher package in this workspace `rosrun ndisensor stray_position_pub 169.254.158.253`
-9. terminal 6 - franka publisher: 
-   1.  cd into franka ros2 workspace and run the publisher. 
+9. Terminal 6 - franka publisher: 
+   1.  cd into franka ros2 workspace: `cd ros2-franka-ws`
+   2.  Source ros2: `source /opt/ros/noetic/setup.bash`
+   3.  Source the workspace: `source install/setup.bash`  
+   4.  To launch the motion file use: `ros2launch motionmannequin motionmannequin.launch.py robot_ip:=173.16.0.2`
+   5.  This opens RVIZ. Next, follow steps below: 
+       1.  
 10. Back to terminal 1: 
-   1. Since `automatecams.py` is a ROS package in the ws, use `rosrun automatecamspkg` to run the package. 
+    1.  Since `automatecams.py` is a ROS package in the ws, use `rosrun automatecamspkg` to run the package. 
 
 
 # Issues
