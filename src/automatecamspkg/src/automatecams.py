@@ -86,9 +86,7 @@ class automation():
             # automation.franka_sub(automation)
             
             counter_save.append(counter)
-            # timestamp.append(str(datetime.datetime.now().strftime('%H:%M:%S')))
-            # timestamp.append(datetime.datetime.now())
-            timestamp.append(time.time())
+            timestamp.append(str(datetime.datetime.now()))
             pressure_val = np.array([pressure_snsr_val,pump_state])
             print(pressure_val)
             pressure.append(pressure_val)
@@ -107,14 +105,15 @@ class automation():
         timestamp = np.asarray(timestamp, dtype='datetime64[s]') # time to readable format
         
         # save timestamps as npz or csv
-        # header = ['Counter','Timestamp','Pressure (kPa)','Polaris Tx','Polaris Ty','Polaris Tz','Polaris Error','Polaris Q0','Polaris Qx','Polaris Qy','Polaris Qz','Franka EE','','','','','','','']
+        header = ['Counter','Timestamp','Pressure (kPa)','Polaris Tx','Polaris Ty','Polaris Tz','Polaris Error','Polaris Q0','Polaris Qx','Polaris Qy','Polaris Qz','Franka EE','','','','','','','']
         # np.savez('src/automatecamspkg/src/outputs/webcam/timestamp'+str(datetime.date.today())+'.npz', counter=counter_save, timestamp=timestamp, pressure=pressure, polaris=polaris, frankajnt=frankajnt)
-        # np.savetxt('src/automatecamspkg/src/outputs/webcam/timestamp'+str(datetime.date.today())+'.csv', np.hstack([counter_save, timestamp, pressure, polaris, frankajnt]),header=header,delimiter=',')
+        fmt = ['%d','%s'] + ['%f'] * 17
+        np.savetxt('src/automatecamspkg/src/outputs/webcam/timestamp_arr'+str(datetime.datetime.now())+'.csv', np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],polaris[:,0], polaris[:,1],polaris[:,2],polaris[:,3],polaris[:,4],polaris[:,5],polaris[:,6],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6],frankajnt[:,7]]),header=header,delimiter=',',fmt=fmt)
         
         # trial save
         header = 'Counter,Timestamp,Pressure (kPa),Pump state'
-        
-        np.savetxt('src/automatecamspkg/src/outputs/webcam/trialsave.csv',np.transpose([counter_save,timestamp,pressure[:,0],pressure[:,1]]),header=header,delimiter=',')
+        fmt = ['%d','%s','%f','%f'] # type: [integer, string, float, float]
+        np.savetxt('src/automatecamspkg/src/outputs/webcam/trialsave.csv',np.transpose([counter_save,timestamp,pressure[:,0],pressure[:,1]]),header=header,delimiter=',',fmt=fmt)
         print('file should have saved by now')
         print('counter shape: ', np.shape(counter_save))
         print('timestamp shape: ', np.shape(timestamp))
@@ -184,7 +183,7 @@ class automation():
                 automation.franka_sub(automation)
                 
                 counter_save.append(counter)
-                timestamp.append(datetime.datetime.now().strftime('%H:%M:%S'))
+                timestamp.append(str(datetime.datetime.now()))
                 pressure_val = np.array([pressure_snsr_val,pump_state])
                 pressure.append(pressure_val)
                 polaris.append(polaris_pos)
@@ -198,10 +197,15 @@ class automation():
         fibrescope.Close()
         cv.destroyAllWindows()
         
+        # conversions
+        pressure = np.asarray(pressure) # tuple to array
+        timestamp = np.asarray(timestamp, dtype='datetime64[s]') 
+        
         # save timestamps as npz or csv
-        # header = ['Counter','Timestamp','Pressure (kPa)','Polaris Tx','Polaris Ty','Polaris Tz','Polaris Error','Polaris Q0','Polaris Qx','Polaris Qy','Polaris Qz','Franka EE','','','','','','','']
+        header = ['Counter','Timestamp','Pressure (kPa)','Polaris Tx','Polaris Ty','Polaris Tz','Polaris Error','Polaris Q0','Polaris Qx','Polaris Qy','Polaris Qz','Franka EE','','','','','','','']
         # np.savez('src/outputs/fibrescope/timestamp'+str(datetime.date.today())+'.npz', counter=counter_save, timestamp=timestamp, pressure=pressure, polaris=polaris, frankajnt=frankajnt)
-        # np.savetxt('src/automatecamspkg/src/outputs/fibrescope/timestamp'+str(datetime.date.today())+'.csv', np.array([counter_save, timestamp, pressure, polaris, frankajnt]),header=header,delimiter=',')
+        fmt = ['%d','%s'] + ['%f'] * 17
+        np.savetxt('src/automatecamspkg/src/outputs/fibrescope/timestamp_arr'+str(datetime.datetime.now())+'.csv', np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],polaris[:,0], polaris[:,1],polaris[:,2],polaris[:,3],polaris[:,4],polaris[:,5],polaris[:,6],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6],frankajnt[:,7]]),header=header,delimiter=',',fmt=fmt)
 
         # trial save
         header = ['Counter','Timestamp','Pressure (kPa)']

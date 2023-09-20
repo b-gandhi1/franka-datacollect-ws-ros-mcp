@@ -40,7 +40,5 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
 
 # Issues
 1. polaris publishing callback error - needs fixing
-2. franka movement code needs adding
-3. arduino publishing but as a parallel process, cannot be called on demand in webcam/fibrescope execution. 
-4. fibrescope sometimes does not work. to solve this open camera with pylon and close > run code again. 
+2. fibrescope sometimes does not work. to solve this open camera with pylon and close > run code again. 
 
