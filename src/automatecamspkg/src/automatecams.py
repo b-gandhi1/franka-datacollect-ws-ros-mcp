@@ -3,15 +3,16 @@
 # -*- coding: utf-8 -*-
 # import sys
 # sys.path.append('/usr/local/lib/python3.7/site-packages')
-import time
+# import time
 import multiprocessing as mp
 import rospy
-from std_msgs.msg import Float32, Float32MultiArray, Float64MultiArray
+from std_msgs.msg import Float32, Float32MultiArray, Int32 # , Float64MultiArray
 import numpy as np
 import cv2 as cv
 from pypylon import pylon
 from pypylon import genicam
 import datetime
+import sys
 
 print('imports done successfully!')
 
@@ -19,6 +20,7 @@ pressure_snsr_val = 0.0
 pump_state = 0.0
 polaris_pos = 0.0
 franka_pos = 0.0
+cam_trig = 0
 
 # define constant parameters - in CAPS
 # TOT_FRAMES = 30*2*60 # 30 fps, 2 mins.
@@ -70,7 +72,7 @@ class automation():
         counter_save = []
         timestamp = []
         pressure = []
-        polaris = []
+        # polaris = []
         frankajnt = []
 
         # for counter in range(self.tot_frames): 
@@ -83,15 +85,15 @@ class automation():
             # run subscribers
             automation.arduino_sub(automation)
             # automation.polaris_sub(automation)
-            # automation.franka_sub(automation)
+            automation.franka_pos_sub(automation)
             
             counter_save.append(counter)
             timestamp.append(str(datetime.datetime.now()))
             pressure_val = np.array([pressure_snsr_val,pump_state])
-            print(pressure_val)
+            # print(pressure_val)
             pressure.append(pressure_val)
             # polaris.append(polaris_pos)
-            # frankajnt.append(franka_pos)
+            frankajnt.append(franka_pos)
 
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
@@ -105,15 +107,15 @@ class automation():
         timestamp = np.asarray(timestamp, dtype='datetime64[s]') # time to readable format
         
         # save timestamps as npz or csv
-        header = ['Counter','Timestamp','Pressure (kPa)','Polaris Tx','Polaris Ty','Polaris Tz','Polaris Error','Polaris Q0','Polaris Qx','Polaris Qy','Polaris Qz','Franka EE','','','','','','','']
+        header = ['Counter','Timestamp','Pressure (kPa)','Franka EE','','','','','','','']
         # np.savez('src/automatecamspkg/src/outputs/webcam/timestamp'+str(datetime.date.today())+'.npz', counter=counter_save, timestamp=timestamp, pressure=pressure, polaris=polaris, frankajnt=frankajnt)
-        fmt = ['%d','%s'] + ['%f'] * 17
-        np.savetxt('src/automatecamspkg/src/outputs/webcam/timestamp_arr'+str(datetime.datetime.now())+'.csv', np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],polaris[:,0], polaris[:,1],polaris[:,2],polaris[:,3],polaris[:,4],polaris[:,5],polaris[:,6],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6],frankajnt[:,7]]),header=header,delimiter=',',fmt=fmt)
+        fmt = ['%d','%s'] + ['%f'] * 10
+        np.savetxt('src/automatecamspkg/src/outputs/webcam/timestamp_arr'+str(datetime.datetime.now())+'.csv', np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6],frankajnt[:,7]]),header=header,delimiter=',',fmt=fmt)
         
         # trial save
-        header = 'Counter,Timestamp,Pressure (kPa),Pump state'
-        fmt = ['%d','%s','%f','%f'] # type: [integer, string, float, float]
-        np.savetxt('src/automatecamspkg/src/outputs/webcam/trialsave.csv',np.transpose([counter_save,timestamp,pressure[:,0],pressure[:,1]]),header=header,delimiter=',',fmt=fmt)
+        # header = 'Counter,Timestamp,Pressure (kPa),Pump state'
+        # fmt = ['%d','%s','%f','%f'] # type: [integer, string, float, float]
+        # np.savetxt('src/automatecamspkg/src/outputs/webcam/trialsave.csv',np.transpose([counter_save,timestamp,pressure[:,0],pressure[:,1]]),header=header,delimiter=',',fmt=fmt)
         print('file should have saved by now')
         print('counter shape: ', np.shape(counter_save))
         print('timestamp shape: ', np.shape(timestamp))
@@ -164,7 +166,7 @@ class automation():
         counter_save = []
         timestamp = []
         pressure = []
-        polaris = []
+        # polaris = []
         frankajnt = []
 
         for counter in range(TOT_FRAMES):
@@ -179,14 +181,14 @@ class automation():
                 
                 # run subscribers
                 automation.arduino_sub(automation)
-                automation.polaris_sub(automation)
-                automation.franka_sub(automation)
+                # automation.polaris_sub(automation)
+                automation.franka_pos_sub(automation)
                 
                 counter_save.append(counter)
                 timestamp.append(str(datetime.datetime.now()))
                 pressure_val = np.array([pressure_snsr_val,pump_state])
                 pressure.append(pressure_val)
-                polaris.append(polaris_pos)
+                # polaris.append(polaris_pos)
                 frankajnt.append(franka_pos)
 
             if cv.waitKey(10) & 0xFF == ord('q'):
@@ -202,47 +204,57 @@ class automation():
         timestamp = np.asarray(timestamp, dtype='datetime64[s]') 
         
         # save timestamps as npz or csv
-        header = ['Counter','Timestamp','Pressure (kPa)','Polaris Tx','Polaris Ty','Polaris Tz','Polaris Error','Polaris Q0','Polaris Qx','Polaris Qy','Polaris Qz','Franka EE','','','','','','','']
+        header = ['Counter','Timestamp','Pressure (kPa)','Franka EE','','','','','','','']
         # np.savez('src/outputs/fibrescope/timestamp'+str(datetime.date.today())+'.npz', counter=counter_save, timestamp=timestamp, pressure=pressure, polaris=polaris, frankajnt=frankajnt)
-        fmt = ['%d','%s'] + ['%f'] * 17
-        np.savetxt('src/automatecamspkg/src/outputs/fibrescope/timestamp_arr'+str(datetime.datetime.now())+'.csv', np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],polaris[:,0], polaris[:,1],polaris[:,2],polaris[:,3],polaris[:,4],polaris[:,5],polaris[:,6],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6],frankajnt[:,7]]),header=header,delimiter=',',fmt=fmt)
+        fmt = ['%d','%s'] + ['%f'] * 10
+        np.savetxt('src/automatecamspkg/src/outputs/fibrescope/timestamp_arr'+str(datetime.datetime.now())+'.csv', np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6],frankajnt[:,7]]),header=header,delimiter=',',fmt=fmt)
 
         # trial save
-        header = ['Counter','Timestamp','Pressure (kPa)']
-        np.savetxt('src/automatecamspkg/src/outputs/fibrescope/trialsave.csv', np.array([counter_save, timestamp, pressure]),header=header,delimiter=',')
+        # header = ['Counter','Timestamp','Pressure (kPa)']
+        # np.savetxt('src/automatecamspkg/src/outputs/fibrescope/trialsave.csv', np.array([counter_save, timestamp, pressure]),header=header,delimiter=',')
         
-    def franka_callback(data):
+    def franka_pos_callback(data):
         rospy.loginfo(rospy.get_caller_id(), "Franka End Effector Position: %s", data.data)
         global franka_pos # ground truth
-        franka_pos = data # ground truth
+        franka_pos = data.data # ground truth
 
-    def franka_sub(self): # subscriber for franka emika robot arm
+    def franka_pos_sub(self): # subscriber for franka emika robot arm
         # subscribe to topic from ros2, use bridge. 
         try:
             rospy.init_node('frankaemika', anonymous=True)
-            rospy.Subscriber('franka_ee_pos', Float32MultiArray, self.franka_callback)
+            rospy.Subscriber('franka_ee_pos', Float32MultiArray, self.franka_pos_callback)
             # rospy.spin()
         except rospy.ROSInterruptException:
             exit()
 
-    def polaris_callback(data):
-        rospy.loginfo(rospy.get_caller_id(), data.data[0])
-        global polaris_pos
-        polaris_pos = data.data[0]
+    # def polaris_callback(data):
+    #     rospy.loginfo(rospy.get_caller_id(), data.data[0])
+    #     global polaris_pos
+    #     polaris_pos = data.data[0]
 
-    def polaris_sub(self): # state of the art comparison, also ground truth backup. 
-        try: 
-            rospy.init_node('polaris', anonymous=True)
-            rospy.Subscriber('Marker_Pos', Float64MultiArray, self.polaris_callback) # topic name = polaris_data - needs to be same in publisher too.
-            # rospy.spin() 
-        except rospy.ROSInterruptException:
-            exit()
+    # def polaris_sub(self): # state of the art comparison, also ground truth backup. 
+    #     try: 
+    #         rospy.init_node('polaris', anonymous=True)
+    #         rospy.Subscriber('Marker_Pos', Float64MultiArray, self.polaris_callback) # topic name = polaris_data - needs to be same in publisher too.
+    #         # rospy.spin() 
+    #     except rospy.ROSInterruptException:
+    #         exit()
         
     def wrong_input():
         print("This is the default case. Input not recognised, please try again.")
+            
+    def franka_trigger_callback(data):
+        rospy.loginfo(rospy.get_caller_id(), "Camera trigger: %s", data.data)
+        global cam_trig # camera trigger
+        cam_trig = data.data
+    def franka_trigger_sub(self):
+        try:
+            rospy.init_node('franka_trigger_camera', anonymous=True)
+            rospy.Subscriber("camera_trigger", Int32, self.franka_trigger_callback) 
+        except rospy.ROSInterruptException:
+            exit()
         
-    
-def main():
+def main(case_select):
     
     # clsobj = automation()
 
@@ -250,17 +262,24 @@ def main():
         'w': automation.webcam_execute,
         'f': automation.fibrescope_execute,
     }
-    case_number = input("Enter relevant letter for camera selection: 'w' - webcam; 'f' - fibrescope : ")
+    # case_select = input("Enter relevant letter for camera selection: 'w' - webcam; 'f' - fibrescope : ")
     # case_number = 1
     # get the function from switcher dictionary
     # if the case number is not found, default to case_default
-    chosen_case = switcher.get(case_number, automation.wrong_input)
+    chosen_case = switcher.get(case_select, automation.wrong_input)
     
-    try: 
-        chosen_case()
-    except KeyboardInterrupt:
-        print('*****ERROR: Manually interrupted*****')
-        pass
+    automation.franka_trigger_sub() # camera trigger from franka, sent when franka starts moving
+    if cam_trig == 1:
+        print('Camera trigger is now 1, recording starting...')
+        try:
+            chosen_case()
+        except KeyboardInterrupt:
+            print('*****ERROR: Manually interrupted*****')
+            pass
+    else:
+        print('Waiting for trigger...')
+        rospy.spin() # will this still work on franka_trigger_sub ????
+        
     # begin multi process to run chosen_case and polaris together: 
     # arduino_process = mp.Process(target=clsobj.arduino_sub)
     # polaris_process = mp.Process(target=clsobj.polaris_sub)
@@ -288,7 +307,6 @@ def main():
     print('main executed -----------------------')
 
 if __name__ == '__main__':
-    main()
+    device = rospy.get_param('/auto_selected_cam/cam_select') # node_name/argsname
+    main(device)
     print('main TO BE executed -----------------------')
-
-    

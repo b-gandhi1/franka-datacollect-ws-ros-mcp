@@ -1,0 +1,5 @@
+arduino_run_pkg
+/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/arduino_run_pkg/cmake.lock /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock
+/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/arduino_run_pkg/lib/pkgconfig/arduino_run_pkg.pc /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/arduino_run_pkg.pc
+/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/arduino_run_pkg/share/arduino_run_pkg/cmake/arduino_run_pkgConfig.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/arduino_run_pkg/cmake/arduino_run_pkgConfig.cmake
+/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/arduino_run_pkg/share/arduino_run_pkg/cmake/arduino_run_pkgConfig-version.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/arduino_run_pkg/cmake/arduino_run_pkgConfig-version.cmake

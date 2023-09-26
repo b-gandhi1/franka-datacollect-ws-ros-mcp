@@ -13,8 +13,8 @@ ros::Publisher pump_state("pump_state",&msg1);
 ros::Publisher pressure_val("pressure_val",&msg2);
 
 //PID constants
-double kp = 2;
-double ki = 5;
+double kp = 0.1;
+double ki = 0.1;
 double kd = 1;
 
 unsigned long currentTime, previousTime;
@@ -44,7 +44,7 @@ double air_pressure_val;
 double voltP;
 double kPa; // variable1 to publish
 double pump_state_est; // variable2 to publish
-const double Setpoint = 5.5; // kPa. Not 6 kPa since that is max saturation point for the sensor.
+const double Setpoint = 2.0; // kPa. Not 6 kPa since that is max saturation point for the sensor.
 
 void setup() {
   int baudrate = 57600;
@@ -89,6 +89,11 @@ void loop() {
   // calculate pump state needed for measured kPa
   pump_state_est = computePID(kPa); 
   digitalWrite(PUMP_PWM, pump_state_est); // apply speed based on sensor feedback
+  
+  if (kPa >= Setpoint)
+  {
+    digitalWrite(VALVE_DIR, HIGH); // open valve if pressure too high. 
+  }
   
 //  Serial.print("    pump: ");
 //  Serial.println(pump_state_est);
