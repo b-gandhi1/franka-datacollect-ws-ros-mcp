@@ -46,7 +46,7 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
     2.  This opens RVIZ, and robot starts to move. Upon connection, it should send a trigger to the camera automation to start recording. So both should start at the same time. 
 
 # Launch file execution
-Use command: `roslaunch launch_pkg automation.launch cam_select:=<s>`, whwew 's' is 'w' or 'f', for webcam or fibrescope respectively. 
+Use command: `roslaunch launch_pkg automation.launch cam_select:=<s>`, where 's' is 'w' or 'f', for webcam or fibrescope respectively. 
 
 # Issues
 1. fibrescope sometimes does not work. to solve this open camera with pylon and close > run code again. 

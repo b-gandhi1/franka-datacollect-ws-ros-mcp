@@ -49,7 +49,7 @@ class automation():
 
     def arduino_sub(self): # subscriber for arduino pressure sensor
         try:
-            rospy.init_node("arduino_vals", anonymous=True)
+            # rospy.init_node("arduino_vals", anonymous=True)
             rospy.Subscriber("pressure_val", Float32, self.arduino_pressure_callback)
             rospy.Subscriber("pump_state", Float32, self.arduino_pumpstatus_callback)
             # spin() simply keeps python from exiting until this node is stopped
@@ -104,10 +104,11 @@ class automation():
 
         # conversions
         pressure = np.asarray(pressure) # tuple to array
+        frankajnt = np.asarray(frankajnt)
         timestamp = np.asarray(timestamp, dtype='datetime64[s]') # time to readable format
         
         # save timestamps as npz or csv
-        header = ['Counter','Timestamp','Pressure (kPa)','Franka EE','','','','','','','']
+        header = ['Counter','Timestamp','Pressure (kPa)','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE T_err','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE R_err']
         # np.savez('src/automatecamspkg/src/outputs/webcam/timestamp'+str(datetime.date.today())+'.npz', counter=counter_save, timestamp=timestamp, pressure=pressure, polaris=polaris, frankajnt=frankajnt)
         fmt = ['%d','%s'] + ['%f'] * 10
         np.savetxt('src/automatecamspkg/src/outputs/webcam/timestamp_arr'+str(datetime.datetime.now())+'.csv', np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6],frankajnt[:,7]]),header=header,delimiter=',',fmt=fmt)
@@ -201,6 +202,7 @@ class automation():
         
         # conversions
         pressure = np.asarray(pressure) # tuple to array
+        frankajnt = np.asarray(frankajnt)
         timestamp = np.asarray(timestamp, dtype='datetime64[s]') 
         
         # save timestamps as npz or csv
@@ -214,14 +216,14 @@ class automation():
         # np.savetxt('src/automatecamspkg/src/outputs/fibrescope/trialsave.csv', np.array([counter_save, timestamp, pressure]),header=header,delimiter=',')
         
     def franka_pos_callback(data):
-        rospy.loginfo(rospy.get_caller_id(), "Franka End Effector Position: %s", data.data)
+        # rospy.loginfo(rospy.get_caller_id(), "Franka End Effector Position: %s", data.data)
         global franka_pos # ground truth
         franka_pos = data.data # ground truth
 
     def franka_pos_sub(self): # subscriber for franka emika robot arm
         # subscribe to topic from ros2, use bridge. 
         try:
-            rospy.init_node('frankaemika', anonymous=True)
+            # rospy.init_node('frankaemika', anonymous=True)
             rospy.Subscriber('franka_ee_pos', Float32MultiArray, self.franka_pos_callback)
             # rospy.spin()
         except rospy.ROSInterruptException:
@@ -244,7 +246,7 @@ class automation():
         print("This is the default case. Input not recognised, please try again.")
             
     def franka_trigger_callback(data):
-        rospy.loginfo(rospy.get_caller_id(), "Camera trigger: %s", data.data)
+        # rospy.loginfo(rospy.get_caller_id(), "Camera trigger: %d", data.data)
         global cam_trig # camera trigger
         cam_trig = data.data
         print('cam_trig: ',cam_trig)            
@@ -254,7 +256,7 @@ class automation():
             rospy.init_node('franka_trigger_camera', anonymous=True)
             rospy.Subscriber("camera_trigger", Int32, self.franka_trigger_callback) 
             
-            if cam_trig != 1: rospy.spin()
+            # if cam_trig != 1: rospy.spin()
                 
         except rospy.ROSInterruptException:
             exit()
@@ -273,18 +275,22 @@ def main(case_select):
     # if the case number is not found, default to case_default
     chosen_case = switcher.get(case_select, automation.wrong_input)
     
-    print('Waiting for trigger...')
+    # print('Waiting for trigger...')
     automation.franka_trigger_sub(automation) # camera trigger from franka, sent when franka starts moving
     # print('cam_trigger',cam_trig)
-    if cam_trig == 1:
-        print('Camera trigger is now 1, recording starting...')
-        try:
-            chosen_case()
-        except KeyboardInterrupt:
-            print('*****ERROR: Manually interrupted*****')
-            pass
-    else:
-        print('Waiting for trigger...')
+    # if cam_trig == 1:
+    #     print('Camera trigger is now 1, recording starting...')
+    #     
+    # else:
+    #     print('Waiting for trigger...')
+    while(cam_trig != 1):
+        pass
+    
+    try:
+        chosen_case()
+    except KeyboardInterrupt:
+        print('*****ERROR: Manually interrupted*****')
+        pass
         
     # begin multi process to run chosen_case and polaris together: 
     # arduino_process = mp.Process(target=clsobj.arduino_sub)
