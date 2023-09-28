@@ -3,8 +3,8 @@
 	<!-- <node name="ros1bridge" pkg="launch_pkg" type="ros1_bridge_run.sh" output="screen" launch-prefix="xterm -e" required="true"/> -->
 	
 	<!-- For PID tuning -->
-	<node name="arduino_vals" pkg="launch_pkg" type="arduino_serial.sh" output="screen" launch-prefix="xterm -e" required="true"/>
-	<node name="plotter" pkg="launch_pkg" type="plot_arduino.sh" output="screen" launch-prefix="xterm -e" respawn="true"/>	
+	<!-- <node name="arduino_vals" pkg="launch_pkg" type="arduino_serial.sh" output="screen" launch-prefix="xterm -e" required="true"/> -->
+	<!-- <node name="plotter" pkg="launch_pkg" type="plot_arduino.sh" output="screen" launch-prefix="xterm -e" respawn="true"/>	 -->
 	
 	<!-- The rest of the programs -->
 	<node name="auto_selected_cam" pkg="automatecamspkg" type="automatecams.py" output="screen" required="true">

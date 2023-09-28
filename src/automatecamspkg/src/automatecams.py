@@ -12,7 +12,7 @@ import cv2 as cv
 from pypylon import pylon
 from pypylon import genicam
 import datetime
-import sys
+# import sys
 
 print('imports done successfully!')
 
@@ -49,7 +49,7 @@ class automation():
 
     def arduino_sub(self): # subscriber for arduino pressure sensor
         try:
-            rospy.init_node('arduino_vals', anonymous=True)
+            rospy.init_node("arduino_vals", anonymous=True)
             rospy.Subscriber("pressure_val", Float32, self.arduino_pressure_callback)
             rospy.Subscriber("pump_state", Float32, self.arduino_pumpstatus_callback)
             # spin() simply keeps python from exiting until this node is stopped
@@ -247,10 +247,15 @@ class automation():
         rospy.loginfo(rospy.get_caller_id(), "Camera trigger: %s", data.data)
         global cam_trig # camera trigger
         cam_trig = data.data
+        print('cam_trig: ',cam_trig)            
+
     def franka_trigger_sub(self):
         try:
             rospy.init_node('franka_trigger_camera', anonymous=True)
             rospy.Subscriber("camera_trigger", Int32, self.franka_trigger_callback) 
+            
+            if cam_trig != 1: rospy.spin()
+                
         except rospy.ROSInterruptException:
             exit()
         
@@ -268,7 +273,9 @@ def main(case_select):
     # if the case number is not found, default to case_default
     chosen_case = switcher.get(case_select, automation.wrong_input)
     
-    automation.franka_trigger_sub() # camera trigger from franka, sent when franka starts moving
+    print('Waiting for trigger...')
+    automation.franka_trigger_sub(automation) # camera trigger from franka, sent when franka starts moving
+    # print('cam_trigger',cam_trig)
     if cam_trig == 1:
         print('Camera trigger is now 1, recording starting...')
         try:
@@ -278,7 +285,6 @@ def main(case_select):
             pass
     else:
         print('Waiting for trigger...')
-        rospy.spin() # will this still work on franka_trigger_sub ????
         
     # begin multi process to run chosen_case and polaris together: 
     # arduino_process = mp.Process(target=clsobj.arduino_sub)
@@ -304,9 +310,6 @@ def main(case_select):
     #     print('*****ERROR: Manually interrupted*****')
     #     pass
     
-    print('main executed -----------------------')
-
 if __name__ == '__main__':
     device = rospy.get_param('/auto_selected_cam/cam_select') # node_name/argsname
     main(device)
-    print('main TO BE executed -----------------------')

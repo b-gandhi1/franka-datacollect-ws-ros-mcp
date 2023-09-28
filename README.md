@@ -8,9 +8,10 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
    1. Go to the browser and franka's ip address: https://173.16.0.2/desk/ 
    2. To control via code: click `Activate FCI`
 4. In current terminal (1):
-   1. Activate virtual env: `source mcp_datacollect_env/bin/activate`
-   2. Source ros1 `source /opt/ros/noetic/setup.bash`
-   3. Source the workspace `source devel/setup.bash`
+   1. `cd` into the `franka-datacollect-ws-ros-mcp`
+   2. Activate virtual env: `source mcp_datacollect_env/bin/activate`
+   3. Source ros1 `source /opt/ros/noetic/setup.bash`
+   4. Source the workspace `source devel/setup.bash`
 5. Terminal 2 - run ros core: 
    1. Source the ros environment: `source /opt/ros/noetic/setup.bash`
    2. Run ros core: `roscore`
@@ -21,7 +22,7 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
       1. cd into `franka-datacollect-ws-ros-mcp`. 
       2. Source ros1 source /opt/ros/noetic/setup.bash
       3. Source the workspace source devel/setup.bash
-      4. run the topic: `rostopic echo /chatter # change topic name accordingly`
+      4. run the topic: `rostopic echo /chatter # change topic name accordingly. chatter=pump_state or pressure_val`
 7. Terminal 4 - running the ros bridge: 
    1. cd into the bridge workspace: `cd ~/ros1_bridge_ws/`
    2. Source ros1 environment first: `source /opt/ros/noetic/setup.bash`
@@ -30,18 +31,19 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
    5. Run the bridge: `ros2 run ros1_bridge dynamic_bridge`
 8. !! IGNORE !! --- Terminal 5 - polaris pubisher: 
    1. run polaris publisher package in this workspace `rosrun ndisensor stray_position_pub 169.254.158.253`
-9. Terminal 6 - franka publisher: 
-   1.  cd into franka ros2 workspace: `cd ~/ros2-franka-ws`
-   2.  Source ros2: `source /opt/ros/foxy/setup.bash`
-   3.  Source the workspace: `source install/setup.bash`  
-   4.  Before executing the code, ensure the gripper and mannequin are in position, and the grip is secure. Use commands for securing grip: 
+9.  Terminal 6 - franka publisher: 
+    1.  cd into franka ros2 workspace: `cd ~/ros2-franka-ws`
+    2.  Source ros2: `source /opt/ros/foxy/setup.bash`
+    3.  Source the workspace: `source install/setup.bash`  
+    4.  Before executing the code, ensure the gripper and mannequin are in position, and the grip is secure. Use commands for securing grip: 
        1.  `` 
        2.  Note: 
-   5.  To launch the motion file use: `ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=173.16.0.2`
-       1.  note: to use simulation (fake hardware) use command: `ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=dont_care use_fake_hardware:=true`
-   6.  This opens RVIZ, and robot starts to move. Upon connection, it should send a trigger to the camera automation to start recording. So both should start at the same time. 
-10. Back to terminal 1: 
-    1.  Since `automatecams.py` is a ROS package in the ws, use `rosrun automatecamspkg <s>` to run the package, where `'s' = 'w' or 'f'` for webcam or fibrescope respectively. 
+10. Back to terminal 1: RUN AUTOMATION
+    1.  Since `automatecams.py` is a ROS package in the ws, use `roslaunch roslaunch launch_pkg automation.launch cam_select:=<s>` to run the package, where `'s' = 'w' or 'f'` for webcam or fibrescope respectively. 
+    2.  Note **this needs to be executed before franka is executed**
+11. To launch the motion file use: `ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=173.16.0.2`
+    1.  note: to use simulation (fake hardware) use command: `ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=dont_care use_fake_hardware:=true`
+    2.  This opens RVIZ, and robot starts to move. Upon connection, it should send a trigger to the camera automation to start recording. So both should start at the same time. 
 
 # Launch file execution
 Use command: `roslaunch launch_pkg automation.launch cam_select:=<s>`, whwew 's' is 'w' or 'f', for webcam or fibrescope respectively. 

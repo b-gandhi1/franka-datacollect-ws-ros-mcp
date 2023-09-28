@@ -13,7 +13,7 @@ ros::Publisher pump_state("pump_state",&msg1);
 ros::Publisher pressure_val("pressure_val",&msg2);
 
 //PID constants
-double kp = 0.1;
+double kp = 10;
 double ki = 0.1;
 double kd = 1;
 
@@ -32,19 +32,20 @@ double cumError, rateError;
 
 // functional connections
 #define VALVE_PWM HG7881_B_IA // Motor B PWM Speed
-#define VALVE_DIR HG7881_B_IB // Motor B Direction
+#define VALVE_DIR HG7881_B_IB // Motor B Dither
 #define PUMP_PWM HG7881_A_IB
 #define PUMP_DIR HG7881_A_IA
 
 // air pressure sensor
-#define air_pressure_pin A0 // pin A0 for sensing air pressure
+#define air_pressure_pin A3 // pin A0 for sensing air pressure
 
 // variables for air pressure sensor
 double air_pressure_val;
 double voltP;
 double kPa; // variable1 to publish
 double pump_state_est; // variable2 to publish
-const double Setpoint = 2.0; // kPa. Not 6 kPa since that is max saturation point for the sensor.
+double valve_pwm_val; // variable for valve openness to release high pressures
+double Setpoint = 2.00; // kPa. Not 6 kPa since that is max saturation point for the sensor.
 
 void setup() {
   int baudrate = 57600;
@@ -54,11 +55,13 @@ void setup() {
   pinMode(PUMP_DIR, OUTPUT);
   pinMode(PUMP_PWM, OUTPUT);
   pinMode(air_pressure_pin, INPUT);
-  digitalWrite(VALVE_DIR, LOW);
-  digitalWrite(VALVE_PWM, HIGH);
+  digitalWrite(VALVE_DIR, LOW); // LOW - forward for filling in air
+  digitalWrite(VALVE_PWM, LOW); // was HIGH. LOW to allow more air to pass through. 
   digitalWrite(PUMP_DIR, LOW);
   digitalWrite(PUMP_PWM, LOW);
-  
+
+//  Setpoint = (2/3 * Setpoint + 1/2) * 1024/5; // convert to raw value
+
   // ROS setup
   nh.initNode();
   nh.getHardware()->setBaud(baudrate);
@@ -66,7 +69,6 @@ void setup() {
   nh.advertise(pressure_val);
   
   delay(100);
-  digitalWrite(PUMP_DIR, LOW); //forward for filling in air
   
 }
 
@@ -88,12 +90,12 @@ void loop() {
   
   // calculate pump state needed for measured kPa
   pump_state_est = computePID(kPa); 
-  digitalWrite(PUMP_PWM, pump_state_est); // apply speed based on sensor feedback
-  
-  if (kPa >= Setpoint)
-  {
-    digitalWrite(VALVE_DIR, HIGH); // open valve if pressure too high. 
-  }
+  analogWrite(PUMP_PWM, pump_state_est); // apply speed based on sensor feedback
+
+//  valve_pwm_val = computePID(kPa);
+//  analogWrite(VALVE_PWM, valve_pwm_val); // change valve openness based on pressure. 
+  // must be HIGH when above Setpoint, and LOW when below. 
+  // LOW PWM allows more time for air to pass, HIGH PWM means almost always closed. 
   
 //  Serial.print("    pump: ");
 //  Serial.println(pump_state_est);
@@ -116,15 +118,15 @@ double computePID(double inp) {
   cumError += error * elapsedTime; // compute integral
   rateError = (error - lastError) / elapsedTime; // compute derivative
 
-  double out = kp * error + ki * cumError + kd * rateError;          //PID output
+  double out = kp * error + ki * cumError + kd * rateError;          // PID output
 
   lastError = error; //remember current error
   previousTime = currentTime; //remember current time
 
-  if (error <= 0.10)
+  if (error <= 0.20)
     {
       // close valve
-      digitalWrite(VALVE_PWM, LOW);
+      digitalWrite(VALVE_PWM, HIGH);
       digitalWrite(VALVE_DIR, LOW); 
       digitalWrite(PUMP_DIR, LOW); // might not be needed... 
     }
