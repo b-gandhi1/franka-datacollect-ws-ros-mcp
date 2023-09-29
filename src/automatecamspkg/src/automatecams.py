@@ -3,23 +3,24 @@
 # -*- coding: utf-8 -*-
 # import sys
 # sys.path.append('/usr/local/lib/python3.7/site-packages')
-# import time
 import multiprocessing as mp
 import rospy
 from std_msgs.msg import Float32, Float32MultiArray, Int32 # , Float64MultiArray
+from geometry_msgs.msg import PoseStamped
 import numpy as np
 import cv2 as cv
 from pypylon import pylon
 from pypylon import genicam
-import datetime
+import time
+import os
 # import sys
 
 print('imports done successfully!')
 
 pressure_snsr_val = 0.0
 pump_state = 0.0
-polaris_pos = 0.0
-franka_pos = 0.0
+# polaris_pos = 0.0
+franka_position = np.zeros(7)
 cam_trig = 0
 
 # define constant parameters - in CAPS
@@ -31,10 +32,7 @@ DESIREDHEIGHT = 480
 
 class automation():
     def __init__(self):
-
-        # self.pressure_snsr_val = 0.0
-        # self.pump_state = 0.0
-        # self.arduino_sub()
+        
         print('init executed ---------------------------')
 
     def arduino_pressure_callback(data): # pressure value check
@@ -66,8 +64,8 @@ class automation():
         webcam.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
         # webcam.set(cv.CAP_PROP_FPS, self.fps)
         webcam.set(cv.CAP_PROP_FPS, FPS)
-        webcam_writer = cv.VideoWriter('src/automatecamspkg/src/outputs/webcam/webcam'+str(datetime.datetime.now())+'.mp4',cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
-        
+        webcam_writer = cv.VideoWriter('src/automatecamspkg/src/outputs/webcam/webcam'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4',cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
+
         # storage variables
         counter_save = []
         timestamp = []
@@ -88,12 +86,12 @@ class automation():
             automation.franka_pos_sub(automation)
             
             counter_save.append(counter)
-            timestamp.append(str(datetime.datetime.now()))
+            timestamp.append(time.strftime("%H-%M-%S"))
             pressure_val = np.array([pressure_snsr_val,pump_state])
             # print(pressure_val)
             pressure.append(pressure_val)
             # polaris.append(polaris_pos)
-            frankajnt.append(franka_pos)
+            frankajnt.append(franka_position)
 
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
@@ -102,16 +100,22 @@ class automation():
         webcam_writer.release()
         cv.destroyAllWindows()
 
+        print(frankajnt) # test print
+
         # conversions
         pressure = np.asarray(pressure) # tuple to array
         frankajnt = np.asarray(frankajnt)
-        timestamp = np.asarray(timestamp, dtype='datetime64[s]') # time to readable format
-        
+        # timestamp = np.asarray(timestamp, dtype='datetime64[s]') # time to readable format
+        timestamp = np.asarray(timestamp)
+
         # save timestamps as npz or csv
-        header = ['Counter','Timestamp','Pressure (kPa)','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE T_err','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE R_err']
+        header = ['Counter','Timestamp','Pressure (kPa)','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE Rw']
         # np.savez('src/automatecamspkg/src/outputs/webcam/timestamp'+str(datetime.date.today())+'.npz', counter=counter_save, timestamp=timestamp, pressure=pressure, polaris=polaris, frankajnt=frankajnt)
-        fmt = ['%d','%s'] + ['%f'] * 10
-        np.savetxt('src/automatecamspkg/src/outputs/webcam/timestamp_arr'+str(datetime.datetime.now())+'.csv', np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6],frankajnt[:,7]]),header=header,delimiter=',',fmt=fmt)
+        fmt = ['%d','%s'] + ['%f'] * 11
+        
+        filename = os.path.join('timestamp_arr'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv')
+        with open (filename, 'wt+'):
+            np.savetxt(os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam',filename), np.transpose([counter_save,timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6]]),header=header,delimiter=',',fmt=fmt)
         
         # trial save
         # header = 'Counter,Timestamp,Pressure (kPa),Pump state'
@@ -121,6 +125,7 @@ class automation():
         print('counter shape: ', np.shape(counter_save))
         print('timestamp shape: ', np.shape(timestamp))
         print('pressure shape: ', np.shape(pressure))
+        print('frankajnt shape: ', np.shape(frankajnt))
         # print(np.hstack((counter_save, timestamp, pressure[:,0], pressure[:,1])))
         
     def fibrescope_execute():
@@ -155,7 +160,7 @@ class automation():
         # fibrescope.UserSetSave.Execute()
         # fibrescope.UserSetDefaultSelector = "UserSetMCP"
         
-        fibre_writer = cv.VideoWriter('src/automatecamspkg/src/automatecamspkg/src/outputs/fibrescope/fibrescope'+str(datetime.datetime.now())+'.mp4',cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
+        fibre_writer = cv.VideoWriter('src/automatecamspkg/src/automatecamspkg/src/outputs/fibrescope/fibrescope'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4',cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         converter = pylon.ImageFormatConverter()
         
@@ -186,11 +191,11 @@ class automation():
                 automation.franka_pos_sub(automation)
                 
                 counter_save.append(counter)
-                timestamp.append(str(datetime.datetime.now()))
+                timestamp.append(time.strftime('%H-%M-%S'))
                 pressure_val = np.array([pressure_snsr_val,pump_state])
                 pressure.append(pressure_val)
                 # polaris.append(polaris_pos)
-                frankajnt.append(franka_pos)
+                frankajnt.append(franka_position)
 
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
@@ -203,13 +208,14 @@ class automation():
         # conversions
         pressure = np.asarray(pressure) # tuple to array
         frankajnt = np.asarray(frankajnt)
-        timestamp = np.asarray(timestamp, dtype='datetime64[s]') 
+        # timestamp = np.asarray(timestamp, dtype='datetime64[s]') 
+        timestamp = np.asarray(timestamp)
         
         # save timestamps as npz or csv
-        header = ['Counter','Timestamp','Pressure (kPa)','Franka EE','','','','','','','']
+        header = ['Counter','Timestamp','Pressure (kPa)','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE Rw']
         # np.savez('src/outputs/fibrescope/timestamp'+str(datetime.date.today())+'.npz', counter=counter_save, timestamp=timestamp, pressure=pressure, polaris=polaris, frankajnt=frankajnt)
-        fmt = ['%d','%s'] + ['%f'] * 10
-        np.savetxt('src/automatecamspkg/src/outputs/fibrescope/timestamp_arr'+str(datetime.datetime.now())+'.csv', np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6],frankajnt[:,7]]),header=header,delimiter=',',fmt=fmt)
+        fmt = ['%d','%s'] + ['%f'] * 11
+        np.savetxt(os.path.join('src/automatecamspkg/src/outputs/fibrescope/timestamp_arr',time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'), np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6]]),header=header,delimiter=',',fmt=fmt)
 
         # trial save
         # header = ['Counter','Timestamp','Pressure (kPa)']
@@ -217,15 +223,21 @@ class automation():
         
     def franka_pos_callback(data):
         # rospy.loginfo(rospy.get_caller_id(), "Franka End Effector Position: %s", data.data)
-        global franka_pos # ground truth
-        franka_pos = data.data # ground truth
-
+        global franka_position # ground truth
+        posTx = data.pose.position.x
+        posTy = data.pose.position.y
+        posTz = data.pose.position.z
+        posRx = data.pose.orientation.x
+        posRy = data.pose.orientation.y
+        posRz = data.pose.orientation.z
+        posRw = data.pose.orientation.w
+        franka_position = np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw])
+        
     def franka_pos_sub(self): # subscriber for franka emika robot arm
         # subscribe to topic from ros2, use bridge. 
         try:
             # rospy.init_node('frankaemika', anonymous=True)
-            rospy.Subscriber('franka_ee_pos', Float32MultiArray, self.franka_pos_callback)
-            # rospy.spin()
+            rospy.Subscriber('franka_ee_pos', PoseStamped, self.franka_pos_callback)
         except rospy.ROSInterruptException:
             exit()
 
@@ -255,8 +267,6 @@ class automation():
         try:
             rospy.init_node('franka_trigger_camera', anonymous=True)
             rospy.Subscriber("camera_trigger", Int32, self.franka_trigger_callback) 
-            
-            # if cam_trig != 1: rospy.spin()
                 
         except rospy.ROSInterruptException:
             exit()

@@ -14,7 +14,7 @@ ros::Publisher pressure_val("pressure_val",&msg2);
 
 //PID constants
 double kp = 10;
-double ki = 0.1;
+double ki = 0.8;
 double kd = 1;
 
 unsigned long currentTime, previousTime;
@@ -56,7 +56,7 @@ void setup() {
   pinMode(PUMP_PWM, OUTPUT);
   pinMode(air_pressure_pin, INPUT);
   digitalWrite(VALVE_DIR, LOW); // LOW - forward for filling in air
-  digitalWrite(VALVE_PWM, LOW); // was HIGH. LOW to allow more air to pass through. 
+  digitalWrite(VALVE_PWM, HIGH); // was HIGH. LOW to allow more air to pass through. 
   digitalWrite(PUMP_DIR, LOW);
   digitalWrite(PUMP_PWM, LOW);
 
@@ -86,7 +86,8 @@ void loop() {
   kPa = voltP * (3/2) - (3/4); 
   
   Serial.print("kPa: ");
-  Serial.println(kPa);
+  Serial.print(kPa);
+  Serial.print("\t");
   
   // calculate pump state needed for measured kPa
   pump_state_est = computePID(kPa); 
@@ -97,8 +98,8 @@ void loop() {
   // must be HIGH when above Setpoint, and LOW when below. 
   // LOW PWM allows more time for air to pass, HIGH PWM means almost always closed. 
   
-//  Serial.print("    pump: ");
-//  Serial.println(pump_state_est);
+  Serial.print("pump: ");
+  Serial.println(pump_state_est);
   
   // Publish to ROS
   msg1.data = pump_state_est;
@@ -123,12 +124,14 @@ double computePID(double inp) {
   lastError = error; //remember current error
   previousTime = currentTime; //remember current time
 
-  if (error <= 0.20)
+  if (error <= 0.10)
     {
       // close valve
       digitalWrite(VALVE_PWM, HIGH);
       digitalWrite(VALVE_DIR, LOW); 
-      digitalWrite(PUMP_DIR, LOW); // might not be needed... 
+      digitalWrite(PUMP_DIR, HIGH); 
+      digitalWrite(PUMP_PWM, LOW);
+      delay(20);
     }
-  return out;                                        //have function return the PID output
+  return out/1000;                                        //have function return the PID output
 }
