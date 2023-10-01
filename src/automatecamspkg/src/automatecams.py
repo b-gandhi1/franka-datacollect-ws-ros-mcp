@@ -3,9 +3,9 @@
 # -*- coding: utf-8 -*-
 # import sys
 # sys.path.append('/usr/local/lib/python3.7/site-packages')
-import multiprocessing as mp
+# import multiprocessing as mp
 import rospy
-from std_msgs.msg import Float32, Float32MultiArray, Int32 # , Float64MultiArray
+from std_msgs.msg import Float32, Int32 # , Float64MultiArray, Float32MultiArray
 from geometry_msgs.msg import PoseStamped
 import numpy as np
 import cv2 as cv
@@ -14,6 +14,7 @@ from pypylon import genicam
 import time
 import os
 # import sys
+import pandas as pd
 
 print('imports done successfully!')
 
@@ -57,14 +58,15 @@ class automation():
 
     def webcam_execute():
         print("Webcam execution selected.")
-        webcam = cv.VideoCapture(4) # usb webcam
+        # webcam = cv.VideoCapture(4) # usb logitech webcam
+        webcam = cv.VideoCapture(0) # use internal webcam
         if not (webcam.isOpened()):
             print("Could not open video device")
         webcam.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
         webcam.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
         # webcam.set(cv.CAP_PROP_FPS, self.fps)
         webcam.set(cv.CAP_PROP_FPS, FPS)
-        webcam_writer = cv.VideoWriter('src/automatecamspkg/src/outputs/webcam/webcam'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4',cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
+        webcam_writer = cv.VideoWriter(os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam/webcam'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
 
         # storage variables
         counter_save = []
@@ -100,7 +102,7 @@ class automation():
         webcam_writer.release()
         cv.destroyAllWindows()
 
-        print(frankajnt) # test print
+        # print(frankajnt) # test print
 
         # conversions
         pressure = np.asarray(pressure) # tuple to array
@@ -109,19 +111,25 @@ class automation():
         timestamp = np.asarray(timestamp)
 
         # save timestamps as npz or csv
-        header = ['Counter','Timestamp','Pressure (kPa)','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE Rw']
+        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE Rw']
         # np.savez('src/automatecamspkg/src/outputs/webcam/timestamp'+str(datetime.date.today())+'.npz', counter=counter_save, timestamp=timestamp, pressure=pressure, polaris=polaris, frankajnt=frankajnt)
-        fmt = ['%d','%s'] + ['%f'] * 11
+        # fmt = ['%d','%s'] + ['%f'] * 9
         
         filename = os.path.join('timestamp_arr'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv')
-        with open (filename, 'wt+'):
-            np.savetxt(os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam',filename), np.transpose([counter_save,timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6]]),header=header,delimiter=',',fmt=fmt)
+        save_arr = [counter_save,timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6]]
+        
+        # with open (filename, 'wt+'):
+        #     np.savetxt(os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam',filename), np.transpose(save_arr),header=header,delimiter=',',fmt=fmt)
+        
+        # use dataframe to save to csv
+        df = pd.DataFrame(np.transpose(save_arr), columns=header)
+        df.to_csv(os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam',filename), header=header, index=True, sep=',', mode='a') 
         
         # trial save
         # header = 'Counter,Timestamp,Pressure (kPa),Pump state'
         # fmt = ['%d','%s','%f','%f'] # type: [integer, string, float, float]
         # np.savetxt('src/automatecamspkg/src/outputs/webcam/trialsave.csv',np.transpose([counter_save,timestamp,pressure[:,0],pressure[:,1]]),header=header,delimiter=',',fmt=fmt)
-        print('file should have saved by now')
+        print('data saving done')
         print('counter shape: ', np.shape(counter_save))
         print('timestamp shape: ', np.shape(timestamp))
         print('pressure shape: ', np.shape(pressure))
@@ -160,7 +168,7 @@ class automation():
         # fibrescope.UserSetSave.Execute()
         # fibrescope.UserSetDefaultSelector = "UserSetMCP"
         
-        fibre_writer = cv.VideoWriter('src/automatecamspkg/src/automatecamspkg/src/outputs/fibrescope/fibrescope'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4',cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
+        fibre_writer = cv.VideoWriter(os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/automatecamspkg/src/outputs/fibrescope/fibrescope'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         converter = pylon.ImageFormatConverter()
         
@@ -212,14 +220,24 @@ class automation():
         timestamp = np.asarray(timestamp)
         
         # save timestamps as npz or csv
-        header = ['Counter','Timestamp','Pressure (kPa)','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE Rw']
+        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE Rw']
+        
+        save_arr = [counter_save,timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6]]
+        filename = os.path.join('timestamp_arr'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv')
+
         # np.savez('src/outputs/fibrescope/timestamp'+str(datetime.date.today())+'.npz', counter=counter_save, timestamp=timestamp, pressure=pressure, polaris=polaris, frankajnt=frankajnt)
-        fmt = ['%d','%s'] + ['%f'] * 11
-        np.savetxt(os.path.join('src/automatecamspkg/src/outputs/fibrescope/timestamp_arr',time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'), np.transpose([counter_save, timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6]]),header=header,delimiter=',',fmt=fmt)
+        # fmt = ['%d','%s'] + ['%f'] * 9
+        # np.savetxt(os.path.join('src/automatecamspkg/src/outputs/fibrescope/timestamp_arr',time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'), np.transpose(save_arr),header=header,delimiter=',',fmt=fmt)
 
         # trial save
         # header = ['Counter','Timestamp','Pressure (kPa)']
         # np.savetxt('src/automatecamspkg/src/outputs/fibrescope/trialsave.csv', np.array([counter_save, timestamp, pressure]),header=header,delimiter=',')
+        
+        # use dataframe to save to csv
+        df = pd.DataFrame(np.transpose(save_arr), columns=header)
+        df.to_csv(os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam',filename), header=header, index=True, sep=',', mode='a') 
+        
+        print('data saving done!')
         
     def franka_pos_callback(data):
         # rospy.loginfo(rospy.get_caller_id(), "Franka End Effector Position: %s", data.data)
