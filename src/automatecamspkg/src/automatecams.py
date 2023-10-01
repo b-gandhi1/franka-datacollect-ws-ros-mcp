@@ -102,6 +102,8 @@ class automation():
         webcam_writer.release()
         cv.destroyAllWindows()
 
+        time.sleep(50)
+        
         # print(frankajnt) # test print
 
         # conversions
@@ -212,6 +214,8 @@ class automation():
         fibrescope.StopGrabbing()
         fibrescope.Close()
         cv.destroyAllWindows()
+        
+        time.sleep(50)
         
         # conversions
         pressure = np.asarray(pressure) # tuple to array

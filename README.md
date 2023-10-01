@@ -50,8 +50,5 @@ Use command: `roslaunch launch_pkg automation.launch cam_select:=<s>`, where 's'
 
 # Issues
 1. fibrescope sometimes does not work. to solve this open camera with pylon and close > run code again. 
-2. so many issues.... 
-   1. ros bridge keeps failing. 
-   2. bad callback error for franka trigger. some changes have been made to address this, need to run again to check. 
-   3. error with saving data as well... something about tuples again. i thought this was already resolved but apparently not. 
+2. video streaming but not saving... dont know why. look into this. 
 
