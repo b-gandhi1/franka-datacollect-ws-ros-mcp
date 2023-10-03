@@ -1,5 +1,0 @@
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/franka_visualization.pc
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/franka_visualization/robot_joint_state_publisher
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/franka_visualization/gripper_joint_state_publisher
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/franka_visualization/cmake/franka_visualizationConfig.cmake
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/franka_visualization/cmake/franka_visualizationConfig-version.cmake

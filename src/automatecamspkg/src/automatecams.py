@@ -32,10 +32,6 @@ DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
 
 class automation():
-    def __init__(self):
-        
-        print('init executed ---------------------------')
-
     def arduino_pressure_callback(data): # pressure value check
         # rospy.loginfo(rospy.get_caller_id() + "Pressure value %s", data.data)
         global pressure_snsr_val
@@ -46,11 +42,11 @@ class automation():
         global pump_state
         pump_state = data.data
 
-    def arduino_sub(self): # subscriber for arduino pressure sensor
+    def arduino_sub(): # subscriber for arduino pressure sensor
         try:
             # rospy.init_node("arduino_vals", anonymous=True)
-            rospy.Subscriber("pressure_val", Float32, self.arduino_pressure_callback)
-            rospy.Subscriber("pump_state", Float32, self.arduino_pumpstatus_callback)
+            rospy.Subscriber("pressure_val", Float32, automation.arduino_pressure_callback)
+            rospy.Subscriber("pump_state", Float32, automation.arduino_pumpstatus_callback)
             # spin() simply keeps python from exiting until this node is stopped
             # rospy.spin()
         except rospy.ROSInterruptException:
@@ -58,15 +54,6 @@ class automation():
 
     def webcam_execute():
         print("Webcam execution selected.")
-        # webcam = cv.VideoCapture(4) # usb logitech webcam
-        webcam = cv.VideoCapture(0) # use internal webcam
-        if not (webcam.isOpened()):
-            print("Could not open video device")
-        webcam.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
-        webcam.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
-        # webcam.set(cv.CAP_PROP_FPS, self.fps)
-        webcam.set(cv.CAP_PROP_FPS, FPS)
-        webcam_writer = cv.VideoWriter(os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam/webcam'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
 
         # storage variables
         counter_save = []
@@ -74,23 +61,35 @@ class automation():
         pressure = []
         # polaris = []
         frankajnt = []
+        
+        webcam = cv.VideoCapture(4) # usb logitech webcam
+        # webcam = cv.VideoCapture(0) # use internal webcam
+        if not (webcam.isOpened()):
+            print("Could not open video device")
+        webcam.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
+        webcam.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
+        webcam.set(cv.CAP_PROP_FPS, FPS)
+        
+        webcam_root = os.path.join('src/automatecamspkg/src/outputs/webcam')
+        webcam_filename = 'webcam-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
+        webcam_writer = cv.VideoWriter(os.path.join(webcam_root,webcam_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
 
         # for counter in range(self.tot_frames): 
         for counter in range(TOT_FRAMES):
             ret, frame = webcam.read()
             if not ret: break 
-            webcam_writer.write(frame)
+            
             cv.imshow('Webcam recording',frame)
+            webcam_writer.write(frame)
             
             # run subscribers
-            automation.arduino_sub(automation)
+            automation.arduino_sub()
             # automation.polaris_sub(automation)
-            automation.franka_pos_sub(automation)
+            automation.franka_pos_sub()
             
             counter_save.append(counter)
             timestamp.append(time.strftime("%H-%M-%S"))
             pressure_val = np.array([pressure_snsr_val,pump_state])
-            # print(pressure_val)
             pressure.append(pressure_val)
             # polaris.append(polaris_pos)
             frankajnt.append(franka_position)
@@ -98,19 +97,19 @@ class automation():
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
                 break    
-        webcam.release()                                    
+            
         webcam_writer.release()
+        webcam.release()  
         cv.destroyAllWindows()
 
-        time.sleep(50)
-        
-        # print(frankajnt) # test print
+        print('Recoridng finished. Saving data...')
+        time.sleep(1)
 
         # conversions
         pressure = np.asarray(pressure) # tuple to array
         frankajnt = np.asarray(frankajnt)
         # timestamp = np.asarray(timestamp, dtype='datetime64[s]') # time to readable format
-        timestamp = np.asarray(timestamp)
+        # timestamp = np.asarray(timestamp)
 
         # save timestamps as npz or csv
         header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE Rw']
@@ -118,7 +117,7 @@ class automation():
         # fmt = ['%d','%s'] + ['%f'] * 9
         
         filename = os.path.join('timestamp_arr'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv')
-        save_arr = [counter_save,timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6]]
+        save_arr = np.array([counter_save,timestamp,pressure[:,0],pressure[:,1],frankajnt[:,0],frankajnt[:,1],frankajnt[:,2],frankajnt[:,3],frankajnt[:,4],frankajnt[:,5],frankajnt[:,6]])
         
         # with open (filename, 'wt+'):
         #     np.savetxt(os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam',filename), np.transpose(save_arr),header=header,delimiter=',',fmt=fmt)
@@ -140,6 +139,13 @@ class automation():
         
     def fibrescope_execute():
         print("Fibrescope execution selected")
+        
+        # storage variables 
+        counter_save = []
+        timestamp = []
+        pressure = []
+        # polaris = []
+        frankajnt = []
         
         # method 1
         # tlFactory = pylon.TlFactory.GetInstance()
@@ -170,20 +176,13 @@ class automation():
         # fibrescope.UserSetSave.Execute()
         # fibrescope.UserSetDefaultSelector = "UserSetMCP"
         
-        fibre_writer = cv.VideoWriter(os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/automatecamspkg/src/outputs/fibrescope/fibrescope'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
+        fibre_writer = cv.VideoWriter(os.path.join('src/automatecamspkg/src/automatecamspkg/src/outputs/fibrescope/fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         converter = pylon.ImageFormatConverter()
         
         # converting to opencv bgr format
         converter.OutputPixelFormat = pylon.PixelType_BGR8packed # method 1 for gray2bgr conversion. CONVERSION IS NECESSARY FOR PLAYABLE VIDEO VIA OPENCV!!
         converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
-        
-        # storage variables 
-        counter_save = []
-        timestamp = []
-        pressure = []
-        # polaris = []
-        frankajnt = []
 
         for counter in range(TOT_FRAMES):
             frame = fibrescope.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
@@ -196,9 +195,9 @@ class automation():
                 fibre_writer.write(bgr_img) # saving video
                 
                 # run subscribers
-                automation.arduino_sub(automation)
+                automation.arduino_sub()
                 # automation.polaris_sub(automation)
-                automation.franka_pos_sub(automation)
+                automation.franka_pos_sub()
                 
                 counter_save.append(counter)
                 timestamp.append(time.strftime('%H-%M-%S'))
@@ -215,7 +214,9 @@ class automation():
         fibrescope.Close()
         cv.destroyAllWindows()
         
-        time.sleep(50)
+        print('Recording finished. Saving data...')
+        
+        time.sleep(1)
         
         # conversions
         pressure = np.asarray(pressure) # tuple to array
@@ -255,11 +256,11 @@ class automation():
         posRw = data.pose.orientation.w
         franka_position = np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw])
         
-    def franka_pos_sub(self): # subscriber for franka emika robot arm
+    def franka_pos_sub(): # subscriber for franka emika robot arm
         # subscribe to topic from ros2, use bridge. 
         try:
             # rospy.init_node('frankaemika', anonymous=True)
-            rospy.Subscriber('franka_ee_pos', PoseStamped, self.franka_pos_callback)
+            rospy.Subscriber('franka_ee_pos', PoseStamped, automation.franka_pos_callback)
         except rospy.ROSInterruptException:
             exit()
 
@@ -285,10 +286,10 @@ class automation():
         cam_trig = data.data
         print('cam_trig: ',cam_trig)            
 
-    def franka_trigger_sub(self):
+    def franka_trigger_sub():
         try:
             rospy.init_node('franka_trigger_camera', anonymous=True)
-            rospy.Subscriber("camera_trigger", Int32, self.franka_trigger_callback) 
+            rospy.Subscriber("camera_trigger", Int32, automation.franka_trigger_callback) 
                 
         except rospy.ROSInterruptException:
             exit()
@@ -308,13 +309,8 @@ def main(case_select):
     chosen_case = switcher.get(case_select, automation.wrong_input)
     
     # print('Waiting for trigger...')
-    automation.franka_trigger_sub(automation) # camera trigger from franka, sent when franka starts moving
-    # print('cam_trigger',cam_trig)
-    # if cam_trig == 1:
-    #     print('Camera trigger is now 1, recording starting...')
-    #     
-    # else:
-    #     print('Waiting for trigger...')
+    automation.franka_trigger_sub() # camera trigger from franka, sent when franka starts moving
+    print('Waiting for cam trigger from franka...')
     while(cam_trig != 1):
         pass
     

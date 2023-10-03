@@ -44,7 +44,7 @@ double air_pressure_val;
 double voltP;
 double kPa; // variable1 to publish
 double pump_state_est; // variable2 to publish
-double valve_pwm_val; // variable for valve openness to release high pressures
+double valve_dir_val; // variable for valve openness to release high pressures
 double Setpoint = 2.00; // kPa. Not 6 kPa since that is max saturation point for the sensor.
 
 void setup() {
@@ -93,8 +93,8 @@ void loop() {
   pump_state_est = computePID(kPa); 
   analogWrite(PUMP_PWM, pump_state_est); // apply speed based on sensor feedback
 
-//  valve_pwm_val = computePID(kPa);
-//  analogWrite(VALVE_PWM, valve_pwm_val); // change valve openness based on pressure. 
+  valve_dir_val = computePID(kPa);
+  analogWrite(VALVE_PWM, valve_dir_val); // change valve openness based on pressure. 
   // must be HIGH when above Setpoint, and LOW when below. 
   // LOW PWM allows more time for air to pass, HIGH PWM means almost always closed. 
   
@@ -127,9 +127,9 @@ double computePID(double inp) {
   if (error <= 0.10)
     {
       // close valve
-      digitalWrite(VALVE_PWM, HIGH);
+//      digitalWrite(VALVE_PWM, HIGH);
       digitalWrite(VALVE_DIR, LOW); 
-      digitalWrite(PUMP_DIR, HIGH); 
+      digitalWrite(PUMP_DIR, LOW); 
       digitalWrite(PUMP_PWM, LOW);
       delay(20);
     }

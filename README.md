@@ -12,6 +12,11 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
    2. Activate virtual env: `source mcp_datacollect_env/bin/activate`
    3. Source ros1 `source /opt/ros/noetic/setup.bash`
    4. Source the workspace `source devel/setup.bash`
+   5. When set-up ready, execute file:
+      - Launch file: Since automatecams.py is a ROS package in the ws, use roslaunch `roslaunch launch_pkg automation.launch cam_select:=<s>` to run the package, where 's' = 'w' or 'f' for webcam or fibrescope respectively. 
+        - THERE IS AN ISSUE WITH THIS. IT DOES NOT SAVE VIDEOS. 
+      - **Another way**: `rosrun automatecamspkg automatecams_2.py <s>` where 's' is the same as earlier. 
+      -  **Note:** this needs to be executed **before** franka is executed
 5. Terminal 2 - run ros core: 
    1. Source the ros environment: `source /opt/ros/noetic/setup.bash`
    2. Run ros core: `roscore`
@@ -38,17 +43,11 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
     4.  Before executing the code, ensure the gripper and mannequin are in position, and the grip is secure. Use commands for securing grip: 
        1.  `` 
        2.  Note: 
-10. Back to terminal 1: RUN AUTOMATION
-    1.  Since `automatecams.py` is a ROS package in the ws, use `roslaunch roslaunch launch_pkg automation.launch cam_select:=<s>` to run the package, where `'s' = 'w' or 'f'` for webcam or fibrescope respectively. 
-    2.  Note **this needs to be executed before franka is executed**
-11. To launch the motion file use: `ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=173.16.0.2`
-    1.  note: to use simulation (fake hardware) use command: `ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=dont_care use_fake_hardware:=true`
-    2.  This opens RVIZ, and robot starts to move. Upon connection, it should send a trigger to the camera automation to start recording. So both should start at the same time. 
-
-# Launch file execution
-Use command: `roslaunch launch_pkg automation.launch cam_select:=<s>`, where 's' is 'w' or 'f', for webcam or fibrescope respectively. 
+10. To launch the motion file use: `ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=173.16.0.2`
+    - **Simulation version:** (fake hardware) use command: `ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=dont_care use_fake_hardware:=true`
+      - This opens RVIZ, and robot starts to move. Upon connection, it should send a trigger to the camera automation to start recording. So both should start at the same time. 
 
 # Issues
 1. fibrescope sometimes does not work. to solve this open camera with pylon and close > run code again. 
-2. video streaming but not saving... dont know why. look into this. 
+2. sometimes the camera trigger does not get registered, along with other ros2 to ros1 communication. Restart `ros1-bridge` to solve this. 
 

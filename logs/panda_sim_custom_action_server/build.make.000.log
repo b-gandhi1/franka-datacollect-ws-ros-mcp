@@ -1,5 +1,0 @@
-[  0%] Built target franka_core_msgs_generate_messages_py
-[100%] [34m[1mGenerating dynamic reconfigure files from cfg/PandaPositionFFJointTrajectoryActionServer.cfg: /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/panda_sim_custom_action_server/include/panda_sim_custom_action_server/PandaPositionFFJointTrajectoryActionServerConfig.h /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/panda_sim_custom_action_server/lib/python3/dist-packages/panda_sim_custom_action_server/cfg/PandaPositionFFJointTrajectoryActionServerConfig.py[0m
-Generating reconfiguration files for PandaPositionFFJointTrajectoryActionServer in panda_joint_trajectory_action
-Wrote header file in /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/panda_sim_custom_action_server/include/panda_sim_custom_action_server/PandaPositionFFJointTrajectoryActionServerConfig.h
-[100%] Built target panda_sim_custom_action_server_gencfg

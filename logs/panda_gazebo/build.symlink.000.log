@@ -1,7 +1,0 @@
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/libpanda_robot_hw_sim.so
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/libpanda_gazebo_ros_control.so
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/panda_gazebo/force_neutral_pose.py
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/panda_gazebo/cmake.lock
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/panda_gazebo.pc
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_gazebo/cmake/panda_gazeboConfig.cmake
-Symlinking /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_gazebo/cmake/panda_gazeboConfig-version.cmake
