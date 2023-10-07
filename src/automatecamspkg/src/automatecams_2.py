@@ -19,9 +19,9 @@ franka_position = np.zeros(7)
 cam_trig = 0
 
 # define constant parameters - in CAPS
-# TOT_FRAMES = 30*2*60 # 30 fps, 2 mins.
-TOT_FRAMES = 30*5 # 5 secs
-FPS = 30.0 # 30 fps
+TOT_FRAMES = 20*2*60 # 30 fps, 2 mins.
+# TOT_FRAMES = 30*5 # 5 secs
+FPS = 20.0 # 30 fps
 DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
 
@@ -114,6 +114,9 @@ class automation():
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
                 break
+            
+            time.sleep(1/FPS)
+
         web_writer.release()
         webcam.release()
         cv.destroyAllWindows()
@@ -146,24 +149,26 @@ class automation():
         
         tlf = pylon.TlFactory.GetInstance()
         fib_info = pylon.DeviceInfo()
-        fib_info.SetIpAddress('169.254.27.123')
-        fibrescope = pylon.InstantCamera(tlf.CreateDevice(fib_info))
+        fib_info.SetIpAddress('169.254.158.4') # might need to set temp address in ip config for pylon cam
+        fibrescope = pylon.InstantCamera(tlf.CreateDevice(fib_info)) 
         print("Using device ", fibrescope.GetDeviceInfo().GetModelName())
         fibrescope.Open() 
         
         # set some basic parameters
-        fibrescope.Width.SetValue(DESIREDWIDTH) # 640
-        fibrescope.Height.SetValue(DESIREDHEIGHT) # 480
+        # fibrescope.TLParamsLocked = False # grab lock
+        # fibrescope.Width.SetValue(DESIREDWIDTH) # 640
+        # fibrescope.Height.SetValue(DESIREDHEIGHT) # 480
         fibrescope.AcquisitionFrameRateAbs.SetValue(FPS)
         fibrescope.GainAuto.SetValue('Off')
         fibrescope.GainRaw.SetValue(200)
-        fibrescope.ExposureTimeAbs = 90000
+        fibrescope.ExposureTimeAbs = 250000.0
         fibrescope.AcquisitionMode.SetValue("Continuous")
         
         fib_root = os.path.join('src/automatecamspkg/src/outputs/fibrescope')
         fib_filename = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
         fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
         
+        # fibrescope.TLParamsLocked = True # grab unlock
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         
         converter = pylon.ImageFormatConverter()
@@ -178,6 +183,8 @@ class automation():
                 exit()
             bgr_img = converter.Convert(frame)
             bgr_img = bgr_img.GetArray()
+            
+            bgr_img =cv.resize(bgr_img,(DESIREDWIDTH,DESIREDHEIGHT)) # resize, not ideal method but seems like the only way left...
             
             cv.imshow("Fibrescope recording", bgr_img)
             fib_writer.write(bgr_img)
@@ -195,6 +202,9 @@ class automation():
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
                 break
+            
+            time.sleep(1/FPS)
+            
         fib_writer.release()
         fibrescope.StopGrabbing()
         fibrescope.Close()
@@ -244,8 +254,8 @@ def main(case_select):
 # ------------------------- 
 if __name__ == '__main__':
     # device = 0
-    # device = sys.argv[1]
-    device = rospy.get_param('auto_selected_cam/cam_select') # node_name/argsname
+    device = sys.argv[1]
+    # device = rospy.get_param('auto_selected_cam/cam_select') # node_name/argsname
     # if device == 0:
         # device = input("Enter relevant letter for camera selection: 'w' - webcam; 'f' - fibrescope : ")
     # get parameter sys python

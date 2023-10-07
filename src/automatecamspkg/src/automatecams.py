@@ -170,7 +170,7 @@ class automation():
         fibrescope.AcquisitionFrameRateAbs.SetValue(FPS)
         fibrescope.GainAuto.SetValue('Off')
         fibrescope.GainRaw.SetValue(200)
-        fibrescope.ExposureTimeAbs = 90000
+        fibrescope.ExposureTimeAbs = 250000.0
         fibrescope.AcquisitionMode.SetValue("Continuous")
         # fibrescope.UserSetSelector = "UserSetMCP"
         # fibrescope.UserSetSave.Execute()
