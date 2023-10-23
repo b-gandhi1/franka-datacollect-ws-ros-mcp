@@ -13,9 +13,9 @@ ros::Publisher pump_state("pump_state",&msg1);
 ros::Publisher pressure_val("pressure_val",&msg2);
 
 //PID constants
-double kp = 10;
-double ki = 0.8;
-double kd = 1;
+double kp = 1;
+double ki = 7;
+double kd = 5;
 
 unsigned long currentTime, previousTime;
 double elapsedTime;
@@ -93,8 +93,8 @@ void loop() {
   pump_state_est = computePID(kPa); 
   analogWrite(PUMP_PWM, pump_state_est); // apply speed based on sensor feedback
 
-  valve_dir_val = computePID(kPa);
-  analogWrite(VALVE_PWM, valve_dir_val); // change valve openness based on pressure. 
+//  valve_dir_val = computePID(kPa);
+//  analogWrite(VALVE_PWM, 255-valve_dir_val); // change valve openness based on pressure. 
   // must be HIGH when above Setpoint, and LOW when below. 
   // LOW PWM allows more time for air to pass, HIGH PWM means almost always closed. 
   

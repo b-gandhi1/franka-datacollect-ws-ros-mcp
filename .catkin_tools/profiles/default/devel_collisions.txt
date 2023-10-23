@@ -1,2 +1,6 @@
+<<<<<<< HEAD
 /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock 417
 /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/./cmake.lock 4
+=======
+/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock 423
+>>>>>>> ecea2fb809c84c821c098903fbea306108f75d51
