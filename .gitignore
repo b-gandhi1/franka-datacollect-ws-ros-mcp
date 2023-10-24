@@ -1,6 +1,8 @@
 pypylon
-mcp_datacollect_env
+mcp_env
 src/automatecamspkg/src/outputs
 build
 devel
 logs
+logs/automatecamspkg/build.symlink.log
+

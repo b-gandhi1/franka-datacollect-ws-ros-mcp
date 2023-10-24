@@ -10,6 +10,8 @@ import time
 import os
 import pandas as pd
 import sys
+import roboticstoolbox as rtb
+from transforms3d import quaternions
 
 print('imports done successfully!')
 
@@ -19,9 +21,9 @@ franka_position = np.zeros(7)
 cam_trig = 0
 
 # define constant parameters - in CAPS
-TOT_FRAMES = 20*2*60 # 30 fps, 2 mins.
-# TOT_FRAMES = 30*5 # 5 secs
-FPS = 20.0 # 30 fps
+TOT_FRAMES = 20*2*60 # 20 fps, 2 mins.
+# TOT_FRAMES = 20*5 # 5 secs
+FPS = 20.0 # 20 fps
 DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
 
@@ -51,7 +53,14 @@ class automation():
         posRy = data.pose.orientation.y
         posRz = data.pose.orientation.z
         posRw = data.pose.orientation.w
-        franka_position = np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw])
+        # above vars are actually joint angles for the 7 joints on the panda arm
+        joints = np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw])
+        # use forward kinematics to extract end-effector position: 
+        panda = rtb.models.DH.Panda() # define robot arm DH convention craigs method
+        T_base_ee = panda.fkine(joints) # calculate forward kinematics
+        T_base_mannequin = ...
+        # convert transformation matrix to quaternion format
+        franka_position = quaternions.mat2quat(T_base_mannequin)
     def franka_pos_sub():
         try: 
             rospy.Subscriber('franka_ee_pos', PoseStamped, automation.franka_pos_callback)
