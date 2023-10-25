@@ -11,19 +11,19 @@ import os
 import pandas as pd
 import sys
 import roboticstoolbox as rtb
-from transforms3d import quaternions
+from pyquaternion import Quaternion
 
 print('imports done successfully!')
 
 pressure_snsr_val = 0.0
 pump_state = 0.0
-franka_position = np.zeros(7)
+franka_position = np.empty(4)
 cam_trig = 0
 
 # define constant parameters - in CAPS
-TOT_FRAMES = 20*2*60 # 20 fps, 2 mins.
-# TOT_FRAMES = 20*5 # 5 secs
 FPS = 20.0 # 20 fps
+TOT_FRAMES = int(FPS*2*60) # 20 fps, 2 mins.
+# TOT_FRAMES = int(FPS*5) # 5 secs
 DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
 
@@ -55,12 +55,15 @@ class automation():
         posRw = data.pose.orientation.w
         # above vars are actually joint angles for the 7 joints on the panda arm
         joints = np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw])
+        # joints = np.array([0,0,0,0,0,0,0])
         # use forward kinematics to extract end-effector position: 
         panda = rtb.models.DH.Panda() # define robot arm DH convention craigs method
-        T_base_ee = panda.fkine(joints) # calculate forward kinematics
+        T_base_ee = np.asarray(panda.fkine(joints)) # calculate forward kinematics, and convert from tuple to array. 
         T_base_mannequin = ...
         # convert transformation matrix to quaternion format
-        franka_position = quaternions.mat2quat(T_base_mannequin)
+        franka_pos_quat= Quaternion(matrix=T_base_ee)
+        franka_position = np.append(franka_pos_quat.real,franka_pos_quat.imaginary)
+        # print(franka_position)
     def franka_pos_sub():
         try: 
             rospy.Subscriber('franka_ee_pos', PoseStamped, automation.franka_pos_callback)
@@ -87,9 +90,9 @@ class automation():
         timestamp = []
         pressure_snsr_vals = []
         pump_state_vals = []
-        frankapos_vals = []
+        frankapos_vals = np.empty(4)
         
-        webcam = cv.VideoCapture(4) # usb logitech webcam
+        webcam = cv.VideoCapture(0) # usb logitech webcam. HPC = 0, laptop = 4
         
         if not webcam.isOpened(): 
             print("ERROR: Unable to open webcam.")
@@ -97,7 +100,7 @@ class automation():
         
         webcam.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
         webcam.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
-        webcam.set(cv.CAP_PROP_FPS, FPS) # 30.0
+        webcam.set(cv.CAP_PROP_FPS, FPS) # 20.0
         
         web_root = os.path.join('src/automatecamspkg/src/outputs/webcam')
         web_filename = 'webcam-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
@@ -115,10 +118,10 @@ class automation():
             automation.franka_pos_sub()
             
             counter_save.append(counter)
-            timestamp.append(time.strftime("%H-%M-%S"))
+            timestamp.append(time.strftime("%H-%M-%S-%SS"))
             pressure_snsr_vals.append(pressure_snsr_val)
             pump_state_vals.append(pump_state)
-            frankapos_vals.append(franka_position)
+            frankapos_vals = np.vstack((frankapos_vals, franka_position)) # append for numpy to stack rows
             
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
@@ -132,13 +135,15 @@ class automation():
         print("Recording has finished. Saving data...")
         
         # conversions
-        frankapos_vals = np.asarray(frankapos_vals) # tuple to array
-        
+        # frankapos_vals = np.asarray(frankapos_vals) # tuple to array
+        frankapos_vals = frankapos_vals[1:,:]
+        print('frankavals shape: ',np.shape(frankapos_vals))
+        print('counter_save shape: ',np.shape(counter_save))
         # save csv file
-        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE Rw']
-        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3],frankapos_vals[:,4],frankapos_vals[:,5],frankapos_vals[:,6]])
+        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka a','Franka bi','Franka cj','Franka dk']
+        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3]])
         
-        root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam')
+        root = os.path.join('~/my_workspaces/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam')
         filename = 'webcam-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'
         
         df = pd.DataFrame(np.transpose(save_arr), columns=header)
@@ -154,7 +159,7 @@ class automation():
         timestamp = []
         pressure_snsr_vals = []
         pump_state_vals = []
-        frankapos_vals = []
+        # frankapos_vals = np.empty(4)
         
         tlf = pylon.TlFactory.GetInstance()
         fib_info = pylon.DeviceInfo()
@@ -174,7 +179,7 @@ class automation():
         fibrescope.AcquisitionMode.SetValue("Continuous")
         
         fib_root = os.path.join('src/automatecamspkg/src/outputs/fibrescope')
-        fib_filename = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
+        fib_filename = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S-%SS")+'.mp4'
         fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
         
         # fibrescope.TLParamsLocked = True # grab unlock
@@ -206,7 +211,7 @@ class automation():
             timestamp.append(time.strftime("%H-%M-%S"))
             pressure_snsr_vals.append(pressure_snsr_val)
             pump_state_vals.append(pump_state)
-            frankapos_vals.append(franka_position)
+            frankapos_vals = np.vstack((frankapos_vals, franka_position)) # append for numpy to stack rows
             
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
@@ -222,13 +227,13 @@ class automation():
         print("Recording has finished. Saving data...")
         
         # conversions
-        frankapos_vals = np.asarray(frankapos_vals) # tuple to array
+        # frankapos_vals = np.asarray(frankapos_vals) # tuple to array
         
         # save csv file
-        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka EE Tx','Franka EE Ty','Franka EE Tz','Franka EE Rx','Franka EE Ry','Franka EE Rz','Franka EE Rw']
-        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3],frankapos_vals[:,4],frankapos_vals[:,5],frankapos_vals[:,6]])
+        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka a','Franka bi','Franka cj','Franka EE dk']
+        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3]])
         
-        root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/fibrescope')
+        root = os.path.join('~/my_workspaces/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/fibrescope')
         filaname = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'
         
         df = pd.DataFrame(np.transpose(save_arr), columns=header)
