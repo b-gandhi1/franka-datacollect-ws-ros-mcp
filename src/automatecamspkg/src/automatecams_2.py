@@ -19,9 +19,9 @@ franka_position = np.zeros(7)
 cam_trig = 0
 
 # define constant parameters - in CAPS
-TOT_FRAMES = 20*2*60 # 30 fps, 2 mins.
+TOT_FRAMES = 20*2*60 # 20 fps, 2 mins.
 # TOT_FRAMES = 30*5 # 5 secs
-FPS = 20.0 # 30 fps
+FPS = 20.0 # 20 fps
 DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
 
