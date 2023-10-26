@@ -3,11 +3,11 @@
 import cv2 as cv
 import os
 import time
-import rospy
+# import rospy
 from std_msgs.msg import String
 
-TOT_FRAMES = 30*5 # 5 secs
-FPS = 30.0 # 30 fps
+FPS = 20.0 # 30 fps
+TOT_FRAMES = int(FPS*5) # 5 secs
 DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
 
@@ -36,12 +36,12 @@ class test_cam():
     # spin() simply keeps python from exiting until this node is stopped
         # rospy.spin()
     def cam_record():
-        cap = cv.VideoCapture(4)
+        cap = cv.VideoCapture(0) # HPC = 0, laptop = 4
         
         if cap.isOpened():
             cap.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
             cap.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
-            cap.set(cv.CAP_PROP_FPS, FPS) # 30.0
+            cap.set(cv.CAP_PROP_FPS, FPS) # 20.0
             
             root = os.path.join('src/automatecamspkg/src/outputs/webcam')
             filename = os.path.join('webcam-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4')
@@ -52,7 +52,7 @@ class test_cam():
                 if not ret: break
                 
                 # test_cam.talker()
-                test_cam.listener()
+                # test_cam.listener()
                 cam_writer.write(frame)
                 cv.imshow('cam_test',frame)
                 
@@ -60,7 +60,7 @@ class test_cam():
                     print('Quitting...')
                     break 
         else:
-            print('Unable to open camera')
+            print('ERROR: Unable to open camera')
         
         cam_writer.release()
         cap.release()

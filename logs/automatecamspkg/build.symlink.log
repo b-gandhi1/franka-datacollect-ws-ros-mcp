@@ -1,3 +1,23 @@
-Linked: (/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/lib/pkgconfig/automatecamspkg.pc, /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/automatecamspkg.pc)
-Linked: (/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/share/automatecamspkg/cmake/automatecamspkgConfig-version.cmake, /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/automatecamspkg/cmake/automatecamspkgConfig-version.cmake)
-Linked: (/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/share/automatecamspkg/cmake/automatecamspkgConfig.cmake, /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/automatecamspkg/cmake/automatecamspkgConfig.cmake)
+Linked: (/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/share/automatecamspkg/cmake/automatecamspkgConfig.cmake, /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/share/automatecamspkg/cmake/automatecamspkgConfig.cmake)
+Linked: (/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/share/automatecamspkg/cmake/automatecamspkgConfig-version.cmake, /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/share/automatecamspkg/cmake/automatecamspkgConfig-version.cmake)
+Linked: (/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/lib/pkgconfig/automatecamspkg.pc, /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/automatecamspkg.pc)
+Could not clean linked files.
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/catkin_tools/execution/stages.py", line 177, in function_proxy
+    return function(logger, event_queue, *args, **kwargs)
+  File "/usr/lib/python3/dist-packages/catkin_tools/jobs/catkin.py", line 348, in link_devel_products
+    clean_linked_files(logger, event_queue, metadata_path, files_that_collide, files_to_clean, dry_run=False)
+  File "/usr/lib/python3/dist-packages/catkin_tools/jobs/catkin.py", line 106, in clean_linked_files
+    dest_collisions = dict([(path, int(count)) for path, count in collisions_reader])
+  File "/usr/lib/python3/dist-packages/catkin_tools/jobs/catkin.py", line 106, in <listcomp>
+    dest_collisions = dict([(path, int(count)) for path, count in collisions_reader])
+ValueError: invalid literal for int() with base 10: 'HEAD'
+
+Stage `symlink` failed with arguments:
+  package: {'package_format': 2, 'name': 'automatecamspkg', 'version': '0.0.0', 'version_compatibility': None, 'description': 'The automatecamspkg package', 'plaintext_description': 'The automatecamspkg package', 'maintainers': [<catkin_pkg.package.Person object at 0x7f33509cb9a0>], 'licenses': ['TODO'], 'urls': [], 'authors': [], 'build_depends': [Dependency(name='roscpp', evaluated_condition=True), Dependency(name='rospy', evaluated_condition=True), Dependency(name='std_msgs', evaluated_condition=True)], 'buildtool_depends': [Dependency(name='catkin', evaluated_condition=True)], 'build_export_depends': [Dependency(name='roscpp', evaluated_condition=True), Dependency(name='rospy', evaluated_condition=True), Dependency(name='std_msgs', evaluated_condition=True)], 'buildtool_export_depends': [], 'exec_depends': [Dependency(name='roscpp', evaluated_condition=True), Dependency(name='rospy', evaluated_condition=True), Dependency(name='std_msgs', evaluated_condition=True)], 'test_depends': [], 'doc_depends': [], 'conflicts': [], 'replaces': [], 'group_depends': [], 'member_of_groups': [], 'exports': [], 'filename': '/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/src/automatecamspkg/package.xml'}
+  package_path: automatecamspkg
+  devel_manifest_path: /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/.catkin_tools/profiles/default/packages/automatecamspkg
+  source_devel_path: /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg
+  dest_devel_path: /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel
+  metadata_path: /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/.catkin_tools/profiles/default
+  prebuild: False

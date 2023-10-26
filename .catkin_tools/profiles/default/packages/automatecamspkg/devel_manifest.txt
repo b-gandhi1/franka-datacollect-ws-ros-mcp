@@ -1,5 +1,5 @@
 automatecamspkg
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/cmake.lock /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/lib/pkgconfig/automatecamspkg.pc /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/automatecamspkg.pc
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/share/automatecamspkg/cmake/automatecamspkgConfig-version.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/automatecamspkg/cmake/automatecamspkgConfig-version.cmake
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/share/automatecamspkg/cmake/automatecamspkgConfig.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/automatecamspkg/cmake/automatecamspkgConfig.cmake
+/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/cmake.lock /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/./cmake.lock
+/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/share/automatecamspkg/cmake/automatecamspkgConfig.cmake /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/share/automatecamspkg/cmake/automatecamspkgConfig.cmake
+/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/share/automatecamspkg/cmake/automatecamspkgConfig-version.cmake /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/share/automatecamspkg/cmake/automatecamspkgConfig-version.cmake
+/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/automatecamspkg/lib/pkgconfig/automatecamspkg.pc /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/automatecamspkg.pc
