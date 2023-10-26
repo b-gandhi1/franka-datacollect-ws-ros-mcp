@@ -1,5 +1,6 @@
 pypylon
 mcp_env
+mcp_datacollect_env
 src/automatecamspkg/src/outputs
 build
 devel
