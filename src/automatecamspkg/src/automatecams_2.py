@@ -118,7 +118,7 @@ class automation():
             automation.franka_pos_sub()
             
             counter_save.append(counter)
-            timestamp.append(time.strftime("%H-%M-%S-%SS"))
+            timestamp.append(time.strftime("%H-%M-%S"))
             pressure_snsr_vals.append(pressure_snsr_val)
             pump_state_vals.append(pump_state)
             frankapos_vals = np.vstack((frankapos_vals, franka_position)) # append for numpy to stack rows
@@ -162,8 +162,14 @@ class automation():
         # frankapos_vals = np.empty(4)
         
         tlf = pylon.TlFactory.GetInstance()
+        # t1 = tlf.CreateTl('BaslerGigE')
         fib_info = pylon.DeviceInfo()
-        fib_info.SetIpAddress('169.254.158.4') # might need to set temp address in ip config for pylon cam
+        # fib_info = t1.CreateDeviceInfo()
+        fib_temp_ip = '169.254.158.4'
+        fib_temp_ip2 = '192.168.0.2'
+        fib_ip = '169.254.257.123'
+        fib_ip_config = '143.167.180.212'
+        fib_info.SetIpAddress(fib_temp_ip2) # might need to set temp address in ip config for pylon cam
         fibrescope = pylon.InstantCamera(tlf.CreateDevice(fib_info)) 
         print("Using device ", fibrescope.GetDeviceInfo().GetModelName())
         fibrescope.Open() 
@@ -174,12 +180,12 @@ class automation():
         # fibrescope.Height.SetValue(DESIREDHEIGHT) # 480
         fibrescope.AcquisitionFrameRateAbs.SetValue(FPS)
         fibrescope.GainAuto.SetValue('Off')
-        fibrescope.GainRaw.SetValue(200)
-        fibrescope.ExposureTimeAbs = 250000.0
+        fibrescope.GainRaw.SetValue(300)
+        fibrescope.ExposureTimeAbs = 100000.0
         fibrescope.AcquisitionMode.SetValue("Continuous")
         
         fib_root = os.path.join('src/automatecamspkg/src/outputs/fibrescope')
-        fib_filename = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S-%SS")+'.mp4'
+        fib_filename = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
         fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
         
         # fibrescope.TLParamsLocked = True # grab unlock
