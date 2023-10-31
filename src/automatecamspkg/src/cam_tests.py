@@ -99,9 +99,9 @@ class test_cam():
         # else:
         #     raise EnvironmentError("no GigE device found")
         # # ---
-        tl = tlf.CreateTl('BaslerGigE')
-        # fib_info = pylon.DeviceInfo()
-        fib_info = tl.CreateDeviceInfo()
+        # tl = tlf.CreateTl('BaslerGigE')
+        fib_info = pylon.DeviceInfo()
+        # fib_info = tl.CreateDeviceInfo()
         fib_temp_ip = '169.254.158.4'
         fib_temp_ip2 = '192.168.0.2'
         fib_ip = '169.254.257.123'
