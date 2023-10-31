@@ -169,8 +169,9 @@ class automation():
         fib_temp_ip2 = '192.168.0.2'
         fib_ip = '169.254.257.123'
         fib_ip_config = '143.167.180.212'
-        fib_info.SetIpAddress(fib_temp_ip2) # might need to set temp address in ip config for pylon cam
-        fibrescope = pylon.InstantCamera(tlf.CreateDevice(fib_info)) 
+        fib_info.SetIpAddress(fib_temp_ip) # might need to set temp address in ip config for pylon cam
+        print("INFO-fib ", fib_info)
+        fibrescope = pylon.InstantCamera(tlf.CreateDevice(fib_info)) # ERROR HERE
         print("Using device ", fibrescope.GetDeviceInfo().GetModelName())
         fibrescope.Open() 
         
