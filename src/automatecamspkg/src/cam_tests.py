@@ -4,7 +4,7 @@ import cv2 as cv
 import os
 import time
 # import rospy
-from std_msgs.msg import String
+# from std_msgs.msg import String
 from pypylon import pylon
 from pypylon import genicam
 
@@ -80,10 +80,8 @@ class test_cam():
     #     return ", ".join(result)    
     def fibre_record():
         tlf = pylon.TlFactory.GetInstance()
-        
         # # ---
         # tl_factory = tlf
-
         # for dev_info in tl_factory.EnumerateDevices():
         #     if dev_info.GetDeviceClass() == 'BaslerGigE':
         #         cam_info = dev_info
@@ -102,16 +100,11 @@ class test_cam():
         # tl = tlf.CreateTl('BaslerGigE')
         fib_info = pylon.DeviceInfo()
         # fib_info = tl.CreateDeviceInfo()
-        fib_temp_ip = '169.254.158.4'
-        fib_temp_ip2 = '192.168.0.2'
-        fib_ip = '169.254.257.123'
-        fib_ip_config = '143.167.180.212'
-        fib_dhcp_ip = '169.254.27.123'
-        fib_static_ip = '192.168.0.2'
+        fib_ip = '192.168.0.2'
         # fib_info.SetIpAddress(fib_temp_ip) # might need to set temp address in ip config for pylon cam
-        fib_info.SetPropertyValue('IpAddress', fib_static_ip)
-        #just a test:
-        print('FIB INFO: ',fib_info)
+        # devices = tlf.EnumerateDevices()
+        # print(f"devices: {devices}")
+        fib_info.SetPropertyValue('IpAddress', fib_ip)
         fibrescope = pylon.InstantCamera(tlf.CreateDevice(fib_info)) # ERROR HERE
         print("Using device ", fibrescope.GetDeviceInfo().GetModelName())
         fibrescope.Open() 
