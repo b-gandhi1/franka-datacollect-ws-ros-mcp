@@ -1,7 +1,0 @@
-ndisensor
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/ndisensor/cmake.lock /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/ndisensor/lib/pkgconfig/ndisensor.pc /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/ndisensor.pc
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/ndisensor/lib/ndisensor/stray_position_pub /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/ndisensor/stray_position_pub
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/ndisensor/lib/ndisensor/mannequin_pos /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/ndisensor/mannequin_pos
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/ndisensor/share/ndisensor/cmake/ndisensorConfig-version.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/ndisensor/cmake/ndisensorConfig-version.cmake
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/ndisensor/share/ndisensor/cmake/ndisensorConfig.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/ndisensor/cmake/ndisensorConfig.cmake

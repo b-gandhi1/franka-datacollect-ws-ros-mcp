@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
-import cv2 as cv
+import cv2 as cv # pip install opencv-python
 import os
 import time
 # import rospy
-from std_msgs.msg import String
-from pypylon import pylon
+# from std_msgs.msg import String
+from pypylon import pylon # cd pypylon > pip install .
 from pypylon import genicam
+# import torchvision # pip install torch 
+# import torchvision.transforms
 
 
 FPS = 20.0 # 20 fps
@@ -38,36 +40,36 @@ class test_cam():
     #     rospy.Subscriber("chatter", String, test_cam.callback)
     # # spin() simply keeps python from exiting until this node is stopped
     #     # rospy.spin()
-    # def cam_record():
-    #     cap = cv.VideoCapture(0) # HPC = 0, laptop = 4
+    def cam_record():
+        cap = cv.VideoCapture(4) # HPC = 0, laptop = 4
         
-    #     if cap.isOpened():
-    #         cap.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
-    #         cap.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
-    #         cap.set(cv.CAP_PROP_FPS, FPS) # 20.0
+        if cap.isOpened():
+            cap.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
+            cap.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
+            cap.set(cv.CAP_PROP_FPS, FPS) # 20.0
             
-    #         root = os.path.join('src/automatecamspkg/src/outputs/webcam')
-    #         filename = os.path.join('webcam-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4')
-    #         cam_writer = cv.VideoWriter(os.path.join(root,filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
+            root = os.path.join('src/automatecamspkg/src/outputs/webcam')
+            filename = os.path.join('webcam-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4')
+            cam_writer = cv.VideoWriter(os.path.join(root,filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
 
-    #         for _ in range(TOT_FRAMES):
-    #             ret,frame = cap.read()
-    #             if not ret: break
+            for _ in range(TOT_FRAMES):
+                ret,frame = cap.read()
+                if not ret: break
                 
-    #             # test_cam.talker()
-    #             # test_cam.listener()
-    #             cam_writer.write(frame)
-    #             cv.imshow('cam_test',frame)
+                # test_cam.talker()
+                # test_cam.listener()
+                cam_writer.write(frame)
+                cv.imshow('cam_test',frame)
                 
-    #             if cv.waitKey(10) & 0xFF == ord('q'):
-    #                 print('Quitting...')
-    #                 break 
-    #     else:
-    #         print('ERROR: Unable to open camera')
+                if cv.waitKey(10) & 0xFF == ord('q'):
+                    print('Quitting...')
+                    break 
+        else:
+            print('ERROR: Unable to open camera')
         
-    #     cam_writer.release()
-    #     cap.release()
-    #     cv.destroyAllWindows()
+        cam_writer.release()
+        cap.release()
+        cv.destroyAllWindows()
     # def format_ip_config(cfg_str):
     #     result = []
     #     cfg = int(cfg_str)
@@ -80,38 +82,10 @@ class test_cam():
     #     return ", ".join(result)    
     def fibre_record():
         tlf = pylon.TlFactory.GetInstance()
-        
-        # # ---
-        # tl_factory = tlf
-
-        # for dev_info in tl_factory.EnumerateDevices():
-        #     if dev_info.GetDeviceClass() == 'BaslerGigE':
-        #         cam_info = dev_info
-        #         print(
-        #             "using %s @ %s (%s), IP config = %s" % (
-        #                 cam_info.GetModelName(),
-        #                 cam_info.GetIpAddress(),
-        #                 cam_info.GetMacAddress(),
-        #                 test_cam.format_ip_config(cam_info.GetIpConfigCurrent())
-        #                 )
-        #             )
-        #         break
-        # else:
-        #     raise EnvironmentError("no GigE device found")
-        # # ---
-        # tl = tlf.CreateTl('BaslerGigE')
         fib_info = pylon.DeviceInfo()
-        # fib_info = tl.CreateDeviceInfo()
-        fib_temp_ip = '169.254.158.4'
-        fib_temp_ip2 = '192.168.0.2'
-        fib_ip = '169.254.257.123'
-        fib_ip_config = '143.167.180.212'
-        fib_dhcp_ip = '169.254.27.123'
         fib_static_ip = '192.168.0.2'
-        # fib_info.SetIpAddress(fib_temp_ip) # might need to set temp address in ip config for pylon cam
-        fib_info.SetPropertyValue('IpAddress', fib_static_ip)
-        #just a test:
-        print('FIB INFO: ',fib_info)
+        # fib_info.SetPropertyValue('IpAddress', fib_static_ip)
+        fib_info.SetIpAddress(fib_static_ip)
         fibrescope = pylon.InstantCamera(tlf.CreateDevice(fib_info)) # ERROR HERE
         print("Using device ", fibrescope.GetDeviceInfo().GetModelName())
         fibrescope.Open() 
@@ -120,22 +94,30 @@ class test_cam():
         # fibrescope.TLParamsLocked = False # grab lock
         # fibrescope.Width.SetValue(DESIREDWIDTH) # 640
         # fibrescope.Height.SetValue(DESIREDHEIGHT) # 480
+        # Setting value for width and height crops the image :( 
+        
+        fibrescope.AcquisitionFrameRateEnable.SetValue(True)
         fibrescope.AcquisitionFrameRateAbs.SetValue(FPS)
         fibrescope.GainAuto.SetValue('Off')
-        fibrescope.GainRaw.SetValue(300)
-        fibrescope.ExposureTimeAbs = 100000.0
+        fibrescope.GainRaw.SetValue(250)
+        fibrescope.ExposureAuto.SetValue('Off')
+        fibrescope.ExposureTimeAbs = 10000.0
         fibrescope.AcquisitionMode.SetValue("Continuous")
+        fibrescope.PixelFormat = "Mono8" # "YUV422Packed" # "Mono8"
         
         fib_root = os.path.join('src/automatecamspkg/src/outputs/fibrescope')
         fib_filename = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
-        fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
-        
+        fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),0)
+        # fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'XVID'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True,pixelformat="uyvy422")
+        # fib_writer = FFMPEG_VideoWriter
         # fibrescope.TLParamsLocked = True # grab unlock
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         
-        converter = pylon.ImageFormatConverter()
-        converter.OutputPixelFormat = pylon.PixelType_BGR8packed
-        converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+        # converter = pylon.ImageFormatConverter()
+        # converter.OutputPixelFormat = pylon.PixelType_BGR8packed
+        # converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+        curr_time = time.time()
+        # transform = torchvision.transforms.Resize((DESIREDHEIGHT,DESIREDWIDTH))
         
         for counter in range(TOT_FRAMES):
             frame = fibrescope.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
@@ -143,11 +125,12 @@ class test_cam():
             if not frame.GrabSucceeded(): 
                 print("ERROR: Unable to grab frame.")
                 exit()
-            bgr_img = converter.Convert(frame)
-            bgr_img = bgr_img.GetArray()
+            # bgr_img = converter.Convert(frame)
+            # bgr_img = bgr_img.GetArray()
+            bgr_img = frame.Array
             
-            bgr_img =cv.resize(bgr_img,(DESIREDWIDTH,DESIREDHEIGHT)) # resize, not ideal method but seems like the only way left...
-            
+            bgr_img = cv.resize(bgr_img,(DESIREDWIDTH,DESIREDHEIGHT)) # resize, not ideal method but seems like the only way left...
+            # bgr_img = transform(bgr_img)
             cv.imshow("Fibrescope recording", bgr_img)
             fib_writer.write(bgr_img)
             
@@ -155,9 +138,12 @@ class test_cam():
                 print('Quitting...')
                 break
             
-            time.sleep(1/FPS)
+            elapsed_time = time.gmtime(time.time() - curr_time)
+            elapsed_time_format = "{:02d}:{:02d}".format(elapsed_time.tm_min,elapsed_time.tm_sec)
+            print('Elapsed time: ',elapsed_time_format,' Frame: ',counter,'/',TOT_FRAMES)
+            # time.sleep(1/FPS)
             
-        fib_writer.release()
+        fib_writer.release # inside or outside the loop, and why??
         fibrescope.StopGrabbing()
         fibrescope.Close()
         cv.destroyAllWindows()

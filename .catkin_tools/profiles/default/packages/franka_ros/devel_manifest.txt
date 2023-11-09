@@ -1,2 +1,0 @@
-franka_ros/franka_ros
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_ros/cmake.lock /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock

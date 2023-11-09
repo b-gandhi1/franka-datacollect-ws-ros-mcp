@@ -1,2 +1,0 @@
-panda_simulator/panda_simulator
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/panda_simulator/cmake.lock /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock

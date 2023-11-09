@@ -1,9 +1,0 @@
-franka_ros_interface/franka_moveit
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_moveit/cmake.lock /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_moveit/lib/pkgconfig/franka_moveit.pc /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/franka_moveit.pc
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_moveit/lib/python3/dist-packages/franka_moveit/__init__.py /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/python3/dist-packages/franka_moveit/__init__.py
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_moveit/lib/franka_moveit/test_scene_interface.py /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/franka_moveit/test_scene_interface.py
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_moveit/lib/franka_moveit/create_demo_planning_scene.py /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/franka_moveit/create_demo_planning_scene.py
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_moveit/lib/franka_moveit/cmake.lock /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/franka_moveit/cmake.lock
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_moveit/share/franka_moveit/cmake/franka_moveitConfig.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/franka_moveit/cmake/franka_moveitConfig.cmake
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/franka_moveit/share/franka_moveit/cmake/franka_moveitConfig-version.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/franka_moveit/cmake/franka_moveitConfig-version.cmake

@@ -1,5 +1,0 @@
-panda_simulator/panda_hardware_interface
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/panda_hardware_interface/cmake.lock /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/panda_hardware_interface/lib/pkgconfig/panda_hardware_interface.pc /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/panda_hardware_interface.pc
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/panda_hardware_interface/share/panda_hardware_interface/cmake/panda_hardware_interfaceConfig-version.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_hardware_interface/cmake/panda_hardware_interfaceConfig-version.cmake
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/panda_hardware_interface/share/panda_hardware_interface/cmake/panda_hardware_interfaceConfig.cmake /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/share/panda_hardware_interface/cmake/panda_hardware_interfaceConfig.cmake

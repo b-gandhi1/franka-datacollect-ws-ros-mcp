@@ -1,2 +1,0 @@
-orocos_kinematics_dynamics/orocos_kinematics_dynamics
-/home/bhoomika/franka-datacollect-ws-ros-mcp/devel/.private/orocos_kinematics_dynamics/cmake.lock /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/./cmake.lock

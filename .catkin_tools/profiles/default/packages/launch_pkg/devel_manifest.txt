@@ -1,5 +1,0 @@
-launch_pkg
-/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/launch_pkg/cmake.lock /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/./cmake.lock
-/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/launch_pkg/share/launch_pkg/cmake/launch_pkgConfig-version.cmake /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/share/launch_pkg/cmake/launch_pkgConfig-version.cmake
-/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/launch_pkg/share/launch_pkg/cmake/launch_pkgConfig.cmake /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/share/launch_pkg/cmake/launch_pkgConfig.cmake
-/home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/.private/launch_pkg/lib/pkgconfig/launch_pkg.pc /home/bg/my_workspaces/franka-datacollect-ws-ros-mcp/devel/lib/pkgconfig/launch_pkg.pc

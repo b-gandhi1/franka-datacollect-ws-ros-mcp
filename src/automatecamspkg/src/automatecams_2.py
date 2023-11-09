@@ -3,15 +3,15 @@ import rospy
 from std_msgs.msg import Float32, Int32 # , Float64MultiArray, Float32MultiArray
 from geometry_msgs.msg import PoseStamped
 import numpy as np
-import cv2 as cv
-from pypylon import pylon
+import cv2 as cv # pip install opencv-python
+from pypylon import pylon # cd pypylon > pip install .
 from pypylon import genicam
 import time
 import os
-import pandas as pd
+import pandas as pd # pip install pandas
 import sys
-import roboticstoolbox as rtb
-from pyquaternion import Quaternion
+import roboticstoolbox as rtb # pip install roboticstoolbox-python
+from pyquaternion import Quaternion # pip install pyquaternion
 
 print('imports done successfully!')
 
@@ -22,7 +22,7 @@ cam_trig = 0
 
 # define constant parameters - in CAPS
 FPS = 20.0 # 20 fps
-TOT_FRAMES = int(FPS*2*60) # 20 fps, 2 mins.
+TOT_FRAMES = int(FPS*90) # 20 fps, 90 secs (1.5 min) long recording
 # TOT_FRAMES = int(FPS*5) # 5 secs
 DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
@@ -127,7 +127,7 @@ class automation():
                 print('Quitting...')
                 break
             
-            time.sleep(1/FPS)
+            # time.sleep(1/FPS)
 
         web_writer.release()
         webcam.release()
@@ -143,7 +143,7 @@ class automation():
         header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka a','Franka bi','Franka cj','Franka dk']
         save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3]])
         
-        root = os.path.join('~/my_workspaces/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam')
+        root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam')
         filename = 'webcam-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'
         
         df = pd.DataFrame(np.transpose(save_arr), columns=header)
@@ -159,17 +159,14 @@ class automation():
         timestamp = []
         pressure_snsr_vals = []
         pump_state_vals = []
-        # frankapos_vals = np.empty(4)
+        frankapos_vals = np.empty(4)
         
         tlf = pylon.TlFactory.GetInstance()
         # t1 = tlf.CreateTl('BaslerGigE')
         fib_info = pylon.DeviceInfo()
         # fib_info = t1.CreateDeviceInfo()
-        fib_temp_ip = '169.254.158.4'
-        fib_temp_ip2 = '192.168.0.2'
-        fib_ip = '169.254.257.123'
-        fib_ip_config = '143.167.180.212'
-        fib_info.SetIpAddress(fib_temp_ip) # might need to set temp address in ip config for pylon cam
+        fib_ip = '192.168.0.2'
+        fib_info.SetIpAddress(fib_ip) # might need to set temp address in ip config for pylon cam
         print("INFO-fib ", fib_info)
         fibrescope = pylon.InstantCamera(tlf.CreateDevice(fib_info)) # ERROR HERE
         print("Using device ", fibrescope.GetDeviceInfo().GetModelName())
@@ -179,22 +176,25 @@ class automation():
         # fibrescope.TLParamsLocked = False # grab lock
         # fibrescope.Width.SetValue(DESIREDWIDTH) # 640
         # fibrescope.Height.SetValue(DESIREDHEIGHT) # 480
+        fibrescope.AcquisitionFrameRateEnable.SetValue(True)
         fibrescope.AcquisitionFrameRateAbs.SetValue(FPS)
         fibrescope.GainAuto.SetValue('Off')
-        fibrescope.GainRaw.SetValue(300)
-        fibrescope.ExposureTimeAbs = 100000.0
+        fibrescope.GainRaw.SetValue(350)
+        fibrescope.ExposureAuto.SetValue('Off')
+        fibrescope.ExposureTimeAbs = 60000.0
         fibrescope.AcquisitionMode.SetValue("Continuous")
+        fibrescope.PixelFormat = "Mono8"
         
         fib_root = os.path.join('src/automatecamspkg/src/outputs/fibrescope')
         fib_filename = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
-        fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
+        fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),0)
         
         # fibrescope.TLParamsLocked = True # grab unlock
         fibrescope.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         
-        converter = pylon.ImageFormatConverter()
-        converter.OutputPixelFormat = pylon.PixelType_BGR8packed
-        converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+        # converter = pylon.ImageFormatConverter()
+        # converter.OutputPixelFormat = pylon.PixelType_BGR8packed
+        # converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
         
         for counter in range(TOT_FRAMES):
             frame = fibrescope.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
@@ -202,9 +202,10 @@ class automation():
             if not frame.GrabSucceeded(): 
                 print("ERROR: Unable to grab frame.")
                 exit()
-            bgr_img = converter.Convert(frame)
-            bgr_img = bgr_img.GetArray()
-            
+            # bgr_img = converter.Convert(frame)
+            # bgr_img = bgr_img.GetArray()
+            bgr_img = frame.Array
+
             bgr_img =cv.resize(bgr_img,(DESIREDWIDTH,DESIREDHEIGHT)) # resize, not ideal method but seems like the only way left...
             
             cv.imshow("Fibrescope recording", bgr_img)
@@ -224,7 +225,8 @@ class automation():
                 print('Quitting...')
                 break
             
-            time.sleep(1/FPS)
+            print('Iter: ',counter,'/',TOT_FRAMES)
+            # time.sleep(1/FPS) # this is not needed, it messes with FPS.. 
             
         fib_writer.release()
         fibrescope.StopGrabbing()
@@ -235,12 +237,13 @@ class automation():
         
         # conversions
         # frankapos_vals = np.asarray(frankapos_vals) # tuple to array
+        frankapos_vals = frankapos_vals[1:,:]
         
         # save csv file
         header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka a','Franka bi','Franka cj','Franka EE dk']
         save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3]])
         
-        root = os.path.join('~/my_workspaces/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/fibrescope')
+        root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/fibrescope')
         filaname = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'
         
         df = pd.DataFrame(np.transpose(save_arr), columns=header)
