@@ -21,8 +21,8 @@ franka_position = np.empty(4)
 cam_trig = 0
 
 # define constant parameters - in CAPS
-FPS = 20.0 # 20 fps
-TOT_FRAMES = int(FPS*90) # 20 fps, 90 secs (1.5 min) long recording
+FPS = 15.0 # 15 fps
+TOT_FRAMES = int(FPS*60) # 15 fps, 60 secs (1 min) long recording
 # TOT_FRAMES = int(FPS*5) # 5 secs
 DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
@@ -92,7 +92,7 @@ class automation():
         pump_state_vals = []
         frankapos_vals = np.empty(4)
         
-        webcam = cv.VideoCapture(0) # usb logitech webcam. HPC = 0, laptop = 4
+        webcam = cv.VideoCapture(0) # usb logitech webcam. HPC = 0, laptop = 4/0
         
         if not webcam.isOpened(): 
             print("ERROR: Unable to open webcam.")
@@ -100,11 +100,13 @@ class automation():
         
         webcam.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
         webcam.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
-        webcam.set(cv.CAP_PROP_FPS, FPS) # 20.0
+        webcam.set(cv.CAP_PROP_FPS, FPS) # 15.0
         
         web_root = os.path.join('src/automatecamspkg/src/outputs/webcam')
         web_filename = 'webcam-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
         web_writer = cv.VideoWriter(os.path.join(web_root,web_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),True)
+        
+        curr_time = time.time()
         
         for counter in range(TOT_FRAMES):
             ret, frame = webcam.read()
@@ -128,6 +130,10 @@ class automation():
                 break
             
             # time.sleep(1/FPS)
+            elapsed_time = time.gmtime(time.time() - curr_time)
+            elapsed_time_format = "{:02d}:{:02d}".format(elapsed_time.tm_min,elapsed_time.tm_sec)
+            print('Elapsed time: ',elapsed_time_format,' Frame: ',counter,'/',TOT_FRAMES)
+
 
         web_writer.release()
         webcam.release()
@@ -179,9 +185,9 @@ class automation():
         fibrescope.AcquisitionFrameRateEnable.SetValue(True)
         fibrescope.AcquisitionFrameRateAbs.SetValue(FPS)
         fibrescope.GainAuto.SetValue('Off')
-        fibrescope.GainRaw.SetValue(350)
+        fibrescope.GainRaw.SetValue(200)
         fibrescope.ExposureAuto.SetValue('Off')
-        fibrescope.ExposureTimeAbs = 60000.0
+        fibrescope.ExposureTimeAbs = 10000.0
         fibrescope.AcquisitionMode.SetValue("Continuous")
         fibrescope.PixelFormat = "Mono8"
         
@@ -195,7 +201,8 @@ class automation():
         # converter = pylon.ImageFormatConverter()
         # converter.OutputPixelFormat = pylon.PixelType_BGR8packed
         # converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
-        
+        curr_time = time.time()
+
         for counter in range(TOT_FRAMES):
             frame = fibrescope.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
             
@@ -225,7 +232,10 @@ class automation():
                 print('Quitting...')
                 break
             
-            print('Iter: ',counter,'/',TOT_FRAMES)
+            # print('Iter: ',counter,'/',TOT_FRAMES)
+            elapsed_time = time.gmtime(time.time() - curr_time)
+            elapsed_time_format = "{:02d}:{:02d}".format(elapsed_time.tm_min,elapsed_time.tm_sec)
+            print('Elapsed time: ',elapsed_time_format,' Frame: ',counter,'/',TOT_FRAMES)
             # time.sleep(1/FPS) # this is not needed, it messes with FPS.. 
             
         fib_writer.release()

@@ -62,3 +62,4 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
        1. run command: `ros2 launch franka_moveit_config moveit.launch.py robot_ip:=173.16.0.2`
        2. In new tab, run `ros2 topic echo /joint_states`
        3. Get first 7 positions and update the cpp file. 
+* Sometimes crashes while running on laptop. Easy fix: connect laptop charger! :) 

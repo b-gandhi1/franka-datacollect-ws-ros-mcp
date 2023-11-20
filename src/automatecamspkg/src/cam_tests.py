@@ -40,8 +40,8 @@ class test_cam():
     #     rospy.Subscriber("chatter", String, test_cam.callback)
     # # spin() simply keeps python from exiting until this node is stopped
     #     # rospy.spin()
-    def cam_record():
-        cap = cv.VideoCapture(4) # HPC = 0, laptop = 4
+    def web_record():
+        cap = cv.VideoCapture(0) # HPC = 0, laptop = 4/0
         
         if cap.isOpened():
             cap.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
@@ -99,11 +99,11 @@ class test_cam():
         fibrescope.AcquisitionFrameRateEnable.SetValue(True)
         fibrescope.AcquisitionFrameRateAbs.SetValue(FPS)
         fibrescope.GainAuto.SetValue('Off')
-        fibrescope.GainRaw.SetValue(250)
+        fibrescope.GainRaw.SetValue(200)
         fibrescope.ExposureAuto.SetValue('Off')
         fibrescope.ExposureTimeAbs = 10000.0
         fibrescope.AcquisitionMode.SetValue("Continuous")
-        fibrescope.PixelFormat = "Mono8" # "YUV422Packed" # "Mono8"
+        fibrescope.PixelFormat = "Mono8" # "YUV422Packed"
         
         fib_root = os.path.join('src/automatecamspkg/src/outputs/fibrescope')
         fib_filename = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
@@ -148,7 +148,7 @@ class test_cam():
         fibrescope.Close()
         cv.destroyAllWindows()
 def main():
-    test_cam.fibre_record()
+    test_cam.web_record()
     
 if __name__ == '__main__':
     main()
