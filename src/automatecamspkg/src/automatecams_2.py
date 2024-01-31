@@ -57,11 +57,11 @@ class automation():
         joints = np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw])
         # joints = np.array([0,0,0,0,0,0,0])
         # use forward kinematics to extract end-effector position: 
-        panda = rtb.models.DH.Panda() # define robot arm DH convention craigs method
-        T_base_ee = np.asarray(panda.fkine(joints)) # calculate forward kinematics, and convert from tuple to array. 
-        T_base_mannequin = ...
+        # panda = rtb.models.DH.Panda() # define robot arm DH convention craigs method
+        # T_base_ee = np.asarray(panda.fkine(joints)) # calculate forward kinematics, and convert from tuple to array. 
+        # T_base_mannequin = ...
         # convert transformation matrix to quaternion format
-        franka_pos_quat= Quaternion(matrix=T_base_ee)
+        # franka_pos_quat= Quaternion(matrix=T_base_ee)
         # franka_position = np.append(franka_pos_quat.real,franka_pos_quat.imaginary)
         franka_position = np.append(np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw]))
         # print(franka_position)
