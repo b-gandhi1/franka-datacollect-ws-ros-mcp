@@ -62,7 +62,8 @@ class automation():
         T_base_mannequin = ...
         # convert transformation matrix to quaternion format
         franka_pos_quat= Quaternion(matrix=T_base_ee)
-        franka_position = np.append(franka_pos_quat.real,franka_pos_quat.imaginary)
+        # franka_position = np.append(franka_pos_quat.real,franka_pos_quat.imaginary)
+        franka_position = np.append(np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw]))
         # print(franka_position)
     def franka_pos_sub():
         try: 
