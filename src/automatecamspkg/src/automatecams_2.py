@@ -17,12 +17,12 @@ print('imports done successfully!')
 
 pressure_snsr_val = 0.0
 pump_state = 0.0
-franka_position = np.empty(4)
+franka_position = np.empty(7)
 cam_trig = 0
 
 # define constant parameters - in CAPS
-FPS = 15.0 # 15 fps
-TOT_FRAMES = int(FPS*60) # 15 fps, 60 secs (1 min) long recording
+FPS = 10.0 # 10 fps
+TOT_FRAMES = int(FPS*60) # 10 fps, 60 secs (1 min) long recording
 # TOT_FRAMES = int(FPS*5) # 5 secs
 DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
@@ -54,7 +54,7 @@ class automation():
         posRz = data.pose.orientation.z
         posRw = data.pose.orientation.w
         # above vars are actually joint angles for the 7 joints on the panda arm
-        joints = np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw])
+        # joints = np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw])
         # joints = np.array([0,0,0,0,0,0,0])
         # use forward kinematics to extract end-effector position: 
         # panda = rtb.models.DH.Panda() # define robot arm DH convention craigs method
@@ -63,7 +63,7 @@ class automation():
         # convert transformation matrix to quaternion format
         # franka_pos_quat= Quaternion(matrix=T_base_ee)
         # franka_position = np.append(franka_pos_quat.real,franka_pos_quat.imaginary)
-        franka_position = np.append(np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw]))
+        franka_position = np.array([posTx,posTy,posTz,posRx,posRy,posRz,posRw])
         # print(franka_position)
     def franka_pos_sub():
         try: 
@@ -91,7 +91,7 @@ class automation():
         timestamp = []
         pressure_snsr_vals = []
         pump_state_vals = []
-        frankapos_vals = np.empty(4)
+        frankapos_vals = np.empty(7)
         
         webcam = cv.VideoCapture(0) # usb logitech webcam. HPC = 0, laptop = 4/0
         
@@ -147,8 +147,8 @@ class automation():
         print('frankavals shape: ',np.shape(frankapos_vals))
         print('counter_save shape: ',np.shape(counter_save))
         # save csv file
-        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka a','Franka bi','Franka cj','Franka dk']
-        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3]])
+        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka Tx','Franka Ty','Franka Tz','Franka Rx','Franka Ry','Franka Rz','Franka Rw']
+        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3],frankapos_vals[:,4],frankapos_vals[:,5],frankapos_vals[:,6]])
         
         root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/webcam')
         filename = 'webcam-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'
@@ -166,7 +166,7 @@ class automation():
         timestamp = []
         pressure_snsr_vals = []
         pump_state_vals = []
-        frankapos_vals = np.empty(4)
+        frankapos_vals = np.empty(7)
         
         tlf = pylon.TlFactory.GetInstance()
         # t1 = tlf.CreateTl('BaslerGigE')
@@ -251,8 +251,8 @@ class automation():
         frankapos_vals = frankapos_vals[1:,:]
         
         # save csv file
-        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka a','Franka bi','Franka cj','Franka EE dk']
-        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3]])
+        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka Tx','Franka Ty','Franka Tz','Franka Rx','Franka Ry','Franka Rz','Franka Rw']
+        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3],frankapos_vals[:,4],frankapos_vals[:,5],frankapos_vals[:,6]])
         
         root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/fibrescope')
         filaname = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'

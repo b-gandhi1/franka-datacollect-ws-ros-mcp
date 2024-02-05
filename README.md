@@ -45,7 +45,7 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
             1.  source ros2 and ros2 ws
             2.  Then: `ros2 launch franka_gripper gripper.launch.py robot_ip:=173.16.0.2`
         2.  Then control Gripper: 
-            1.  **GRIP OPEN:** `ros2 action send_goal /panda_gripper/gripper_action control_msgs/action/GripperCommand "{command: {position: 0.024, max_effort: -1}}"`
+            1.  **GRIP OPEN:** `ros2 action send_goal /panda_gripper/gripper_action control_msgs/action/GripperCommand "{command: {position: 0.022, max_effort: -1}}"`
             2.  **GRIP SECURE:** `ros2 action send_goal /panda_gripper/grasp franka_msgs/action/Grasp "{width: 0.0, force: 40.0, speed: 0.1,  epsilon:{inner: 0.08, outer: 0.08}}"` 
 10. To launch the motion file use: `ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=173.16.0.2`
     - **Simulation version:** (fake hardware) use command: `ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=dont_care use_fake_hardware:=true`
