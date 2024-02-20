@@ -62,4 +62,11 @@ Data collecting from MCP using the franka arm. Data collection from webcam and f
        1. run command: `ros2 launch franka_moveit_config moveit.launch.py robot_ip:=173.16.0.2`
        2. In new tab, run `ros2 topic echo /joint_states`
        3. Get first 7 positions and update the cpp file. 
-* Sometimes crashes while running on laptop. Easy fix: connect laptop charger! :) 
+* RT Kernel: Sometimes ROS crashes while running on laptop. Easy fix: connect laptop charger! :) 
+
+# LIVE DEMO
+* Run live demo using: 
+  * For fibrescope, lukas kanade: `rosrun live_demo_pkg live_demo_fib_lk.py`
+  * For webcam - WIP
+  * To open plotjuggler for ros1: `rosrun plotjuggler plotjuggler`
+    * load the xml file in this directory called: `mcp_livedemo_fib_lk_ros1.xml`

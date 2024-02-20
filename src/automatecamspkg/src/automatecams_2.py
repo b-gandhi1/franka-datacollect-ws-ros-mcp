@@ -10,8 +10,8 @@ import time
 import os
 import pandas as pd # pip install pandas
 import sys
-import roboticstoolbox as rtb # pip install roboticstoolbox-python
-from pyquaternion import Quaternion # pip install pyquaternion
+# import roboticstoolbox as rtb # pip install roboticstoolbox-python
+# from pyquaternion import Quaternion # pip install pyquaternion
 
 print('imports done successfully!')
 
@@ -93,7 +93,7 @@ class automation():
         pump_state_vals = []
         frankapos_vals = np.empty(7)
         
-        webcam = cv.VideoCapture(0) # usb logitech webcam. HPC = 0, laptop = 4/0
+        webcam = cv.VideoCapture(4) # usb logitech webcam. HPC = 0, laptop = 4/0
         
         if not webcam.isOpened(): 
             print("ERROR: Unable to open webcam.")
@@ -101,7 +101,7 @@ class automation():
         
         webcam.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
         webcam.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
-        webcam.set(cv.CAP_PROP_FPS, FPS) # 15.0
+        webcam.set(cv.CAP_PROP_FPS, FPS) # 10.0
         
         web_root = os.path.join('src/automatecamspkg/src/outputs/webcam')
         web_filename = 'webcam-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
