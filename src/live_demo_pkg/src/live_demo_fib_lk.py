@@ -87,9 +87,9 @@ def fib_LK(): # Lucas-Kanade, sparse optical flow, local solution
     else: 
         ref_frame = ref_frame.Array
         ref_frame = cv.resize(ref_frame,(DESIREDWIDTH,DESIREDHEIGHT))
-        cv.imshow("Reference frame RAW", ref_frame)
+        # cv.imshow("Reference frame RAW", ref_frame)
         ref_frame = fibrescope_process(ref_frame)
-        cv.imshow("Reference frame processed", ref_frame)
+        # cv.imshow("Reference frame processed", ref_frame)
     
     # LK parameters: 
     feature_params = dict( maxCorners = 100, 
