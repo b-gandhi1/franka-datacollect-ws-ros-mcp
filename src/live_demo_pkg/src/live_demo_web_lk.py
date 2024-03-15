@@ -34,14 +34,90 @@ def webcam_process(frame):
     # dilated = cv.dilate(morph_close,kernel)
 
     return masked 
-def webcam_execute():
-    print("Webcam execution selected.")
+
+def z_brightness(frame): # use this to get average brightness of each frame
+    norm_frame = frame/np.max(frame)
+    bright_avg = np.average(norm_frame)
+    return bright_avg
+
+def webcam_LK():
+    web_lk_pub = rospy.Publisher('web_lk_topic', Float32) # ros topic lk init
+    web_z_pub = rospy.Publisher('web_z_topic', Float32) # ros topic z init
+    rospy.init_node('mcp_web_node', anonymous=True) # ros node init
+    rate = rospy.Rate(FPS) # 10hz
     
     webcam = cv.VideoCapture(4) # usb logitech webcam
     if not (webcam.isOpened()):
         print("Could not open video device")
+    
     webcam.set(cv.CAP_PROP_FRAME_WIDTH, DESIREDWIDTH) # 640
     webcam.set(cv.CAP_PROP_FRAME_HEIGHT, DESIREDHEIGHT) # 480
     webcam.set(cv.CAP_PROP_FPS, FPS)
     
+    # take ref_frame:
+    ret, ref_frame = webcam.read()
+    ref_frame = webcam_process(ref_frame)
     
+    # LK parameters: 
+    feature_params = dict( maxCorners = 100, 
+                            qualityLevel = 0.01, # between 0 and 1. Lower numbers = higher quality level. 
+                            minDistance = 5.0, # distance in pixels between points being monitored. 
+                            blockSize = 3,
+                            useHarrisDetector = False, # Shi-Tomasi better for corner detection than Harris for fibrescope. 
+                            k = 0.04 ) # something to do with area density, starts centrally. high values spread it out. low values keep it dense.
+    lk_params = dict( winSize = (45, 45),
+                maxLevel = 2,
+                criteria = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03))
+
+    color = np.random.randint(0, 255, (500, 3)) # Create some random colors 
+    
+    p0 = cv.goodFeaturesToTrack(ref_frame, mask = None, **feature_params) # Shi-Tomasi corner detection
+    # p0 = cv.cornerHarris(ref_frame, 10,10,0.3) # Harris corner detection, ERROR. figure out how to use this!! 
+    # cv.imshow('ref frame temp',ref_frame)
+    mask_OF = np.zeros_like(ref_frame)
+
+    p1,st,err = None,None,None
+    
+    while not rospy.is_shutdown():
+        ret, frame = webcam.read()
+        if not ret: break
+        
+        frame_filt = webcam_process(frame)
+        cv.imshow("Webcam frame processed",frame_filt)
+        
+        p1,st,err = cv.calcOpticalFlowPyrLK(ref_frame, frame_filt, p0, p1, st, err,**lk_params)
+        if p1 is not None:
+            good_new = p1[st==1]
+            good_old = p0[st==1]
+        
+        for i, (new, old) in enumerate(zip(good_new, good_old)):
+            a, b = new.ravel()
+            c, d = old.ravel()
+            mask_OF = cv.line(mask_OF, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
+            frame_filt = cv.circle(frame_filt, (int(a), int(b)), 5, color[i].tolist(), -1)
+        img = cv.add(frame_filt, mask_OF)
+        cv.imshow('Optical Flow - Lucas-Kanade', img)
+        
+        # publish value
+        web_lk_val = np.mean(p1[...,0])
+        # rospy.loginfo(web_lk_val)
+        web_lk_pub.publish(web_lk_val)
+        web_z_val = (z_brightness(frame_filt))
+        # rospy.loginfo(web_z_val)
+        web_z_pub.publish(web_z_val)
+        
+        rate.sleep()
+        
+        if cv.waitKey(1) & 0xFF == ord('q'):
+            print('Quitting...')
+            break
+    webcam.release()
+    cv.destroyAllWindows()
+    
+if __name__ == '__main__':
+    try:
+        webcam_LK()
+    except rospy.ROSInterruptException:
+        cv.destroyAllWindows()
+        pass
+

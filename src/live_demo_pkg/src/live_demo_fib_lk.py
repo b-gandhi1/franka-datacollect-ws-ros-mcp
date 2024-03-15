@@ -133,7 +133,7 @@ def fib_LK(): # Lucas-Kanade, sparse optical flow, local solution
             a, b = new.ravel()
             c, d = old.ravel()
             mask_OF = cv.line(mask_OF, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
-            frame = cv.circle(frame_filt, (int(a), int(b)), 5, color[i].tolist(), -1)
+            frame_filt = cv.circle(frame_filt, (int(a), int(b)), 5, color[i].tolist(), -1)
         img = cv.add(frame_filt, mask_OF)
         cv.imshow('Optical Flow - Lucas-Kanade', img)
 
