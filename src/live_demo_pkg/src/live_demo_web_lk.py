@@ -4,6 +4,7 @@ from std_msgs.msg import Float32, Int32 # , Float64MultiArray, Float32MultiArray
 # from geometry_msgs.msg import PoseStamped
 import numpy as np
 import cv2 as cv # pip install opencv-python
+import time
 
 pressure_snsr_val = 0.0
 pump_state = 0.0
@@ -25,7 +26,7 @@ def webcam_process(frame):
     kernel = np.ones((4,4),np.uint8)
     gray = cv.cvtColor(frame,cv.COLOR_RGB2GRAY)
     mask_blank = np.zeros_like(gray,dtype='uint8') # ,dtype='uint8'
-    x,y,w,h = 0,60,635,340 # (x,y) = top left params
+    x,y,w,h = 20,70,635,340 # (x,y) = top left params
     rect = cv.rectangle(mask_blank, (x, y), (x+w, y+h), (255,255,255), -1) # mask apply
     masked = cv.bitwise_and(gray,gray,mask=rect)
     # binary = cv.threshold(masked,50,255,cv.THRESH_BINARY)[1] 
@@ -46,7 +47,7 @@ def webcam_LK():
     rospy.init_node('mcp_web_node', anonymous=True) # ros node init
     rate = rospy.Rate(FPS) # 10hz
     
-    webcam = cv.VideoCapture(4) # usb logitech webcam
+    webcam = cv.VideoCapture(0) # usb logitech webcam
     if not (webcam.isOpened()):
         print("Could not open video device")
     
@@ -55,9 +56,10 @@ def webcam_LK():
     webcam.set(cv.CAP_PROP_FPS, FPS)
     
     # take ref_frame:
+    time.sleep(3)
     ret, ref_frame = webcam.read()
     ref_frame = webcam_process(ref_frame)
-    
+    # cv.imshow('ref frame',ref_frame)
     # LK parameters: 
     feature_params = dict( maxCorners = 100, 
                             qualityLevel = 0.01, # between 0 and 1. Lower numbers = higher quality level. 
