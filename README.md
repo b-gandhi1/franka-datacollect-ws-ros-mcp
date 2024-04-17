@@ -74,3 +74,14 @@ Run live demo using the following:
 * To open plotjuggler for ros1: `rosrun plotjuggler plotjuggler`
   * load the xml file in this directory called: `mcp_livedemo_fib_lk_ros1.xml`
 * rqt_plot is another option: `rosrun rqt_plot rqt_plot`
+
+# IMU tests
+* Once started and abruply stopped, requires killing via terminal
+* Follow these steps: 
+```
+ps -fA | grep python # lists the running programmes
+kill **** # the number being the second set of digits printed from the above line
+``` 
+* OR just kill the terminal and start over! 
+we still got issues and no solutions as of yet :( 
+the issue is that no values are being printed/published on either end. the arduino is not printing anythign!!!!
