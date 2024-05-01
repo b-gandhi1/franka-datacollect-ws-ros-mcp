@@ -76,12 +76,26 @@ Run live demo using the following:
 * rqt_plot is another option: `rosrun rqt_plot rqt_plot`
 
 # IMU tests
-* Once started and abruply stopped, requires killing via terminal
-* Follow these steps: 
+* Set-up steps: 
+  1. Connect PC via ethernet
+  2. Enable hotspot
+  3. Ensure the credentials match thr ones in the arduino code
+  4. Ensure the firewall allows the arduino device through. Arduino ip addr: `10.42.0.88`. 
+  5. Connect Arduino via USB to power it. 
+* Linux terminal: 
 ```
-ps -fA | grep python # lists the running programmes
-kill **** # the number being the second set of digits printed from the above line
+cd ~/franka-datacollect-ws-ros-mcp
+. /opt/ros/noetic/setup.bash # source ros
+. devel/setup.bash
+rosrun automatepkg imutest.py # Run the server (which is also the publisher for ROS)
+# start running the automatecams_2.py once this starts publishing. 
+
+```
+## Troubleshooting
+* If `acm1` selected for board, may create issues. acm0 preffered. 
+```
+sudo chmod 666 /dev/ttyACM0 # run in bash
+# then log out and in again into laptop. 
+# try uploading again. 
 ``` 
-* OR just kill the terminal and start over! 
-we still got issues and no solutions as of yet :( 
-the issue is that no values are being printed/published on either end. the arduino is not printing anythign!!!!
+* If NOT connecting to server, may be because of IP address changes. It updates every week on laptop. This needs to reflect in code for server and in the python sketch. 

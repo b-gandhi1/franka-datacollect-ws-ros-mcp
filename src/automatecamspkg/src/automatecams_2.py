@@ -28,8 +28,21 @@ DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
 
 class automation():
-    
-    # ARDUINO SUB -------
+    # IMU ARDUINO-NANO33IOT SUB -------
+    def imuX_callback(data):
+        global rotX
+        rotX = data.data
+    def imuY_callback(data):
+        global rotY
+        rotY = data.data
+    def imu_sub():
+        try:
+            rospy.Subscriber('rotX', Float32, automation.imuX_callback)
+            rospy.Subscriber('rotY', Float32, automation.imuY_callback)
+        except rospy.ROSInterruptException:
+            exit()
+    # -------------------
+    # ARDUINO UNO SUB -------
     def arduino_pressure_callback(data):
         global pressure_snsr_val
         pressure_snsr_val = data.data
@@ -119,6 +132,7 @@ class automation():
             # run subscribers alongside
             automation.arduino_sub()
             automation.franka_pos_sub()
+            automation.imu_sub()
             
             counter_save.append(counter)
             timestamp.append(time.strftime("%H-%M-%S"))
@@ -167,6 +181,7 @@ class automation():
         pressure_snsr_vals = []
         pump_state_vals = []
         frankapos_vals = np.empty(7)
+        rotXvals, rotYvals = [], []
         
         tlf = pylon.TlFactory.GetInstance()
         # t1 = tlf.CreateTl('BaslerGigE')
@@ -228,6 +243,8 @@ class automation():
             pressure_snsr_vals.append(pressure_snsr_val)
             pump_state_vals.append(pump_state)
             frankapos_vals = np.vstack((frankapos_vals, franka_position)) # append for numpy to stack rows
+            rotXvals.append(rotX)
+            rotYvals.append(rotY)
             
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
@@ -251,8 +268,8 @@ class automation():
         frankapos_vals = frankapos_vals[1:,:]
         
         # save csv file
-        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','Franka Tx','Franka Ty','Franka Tz','Franka Rx','Franka Ry','Franka Rz','Franka Rw']
-        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3],frankapos_vals[:,4],frankapos_vals[:,5],frankapos_vals[:,6]])
+        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','IMU Rx','IMU Ry','Franka Tx','Franka Ty','Franka Tz','Franka Rx','Franka Ry','Franka Rz','Franka Rw']
+        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,rotXvals,rotYvals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3],frankapos_vals[:,4],frankapos_vals[:,5],frankapos_vals[:,6]])
         
         root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/fibrescope')
         filaname = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'
