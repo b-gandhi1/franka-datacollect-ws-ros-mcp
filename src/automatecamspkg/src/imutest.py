@@ -12,15 +12,18 @@ print("Current IP -addr HOST: ", HOST)
 PORT = 2055  # Port to listen on (non-privileged ports are > 1023)
 FPS = 10 # Hz
 
-def gyro_integrate(d_roll, d_pitch, d_yaw):
-    
+roll_x, pitch_y, yaw_z = 0.0, 0.0, 0.0
+
+def gyro_integrate(d_roll, d_pitch, d_yaw): # input is rate of change - i.e. angular velocity
+    global roll_x, pitch_y, yaw_z 
     dt = 1.0/FPS
     
+    # integration of values 
     roll_x = roll_x + d_roll * dt 
     pitch_y = pitch_y + d_pitch * dt
-    yaw_z = yaw_z + d_yaw * dt
+    yaw_z = yaw_z + d_yaw * dt 
     
-    return roll_x, pitch_y, yaw_z
+    return roll_x, pitch_y, yaw_z # output is angle
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     rospy.init_node('imutest', anonymous=True) # ros node init
     rotX_pub = rospy.Publisher('rotX', Float32, queue_size=10)
@@ -46,8 +49,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
                 check = check+1
                 values = data.split(',')
-                rotX = float(values[0])
-                rotY = float(values[1])
+                X_raw = float(values[0])
+                Y_raw = float(values[1])
+                
+                rotX, rotY, rotZ = gyro_integrate(X_raw, Y_raw, 0)
                 
                 if rotX == 404.0404 or rotY == 404.0404:
                     print("ERROR: No data received")
