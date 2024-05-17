@@ -9,9 +9,14 @@
 char ssid[] = "bhoomika-Latitude-5520";
 char pass[] = "temporary";
 
-char server[] = "143.167.181.242"; // IP address of the destination server. NEEDS TO BE SAME AS IN SERVER.PY
-//char server[] = "bgandhi1.shef.ac.uk"; // not currently working
+//char server[] = "143.167.181.242"; // IP address of the destination server. NEEDS TO BE SAME AS IN SERVER.PY
+char my_hostname[] = "bgandhi1.shef.ac.uk"; // not currently working
+IPAddress server; // store IP address in this variable
 int port = 2055; // Port to connect (for HTTP it's usually 80)
+
+// get IP address: 
+int err = WiFi.hostByName(my_hostname, server);
+
 
 WiFiClient client;
 
@@ -63,6 +68,16 @@ void setup() {
     {
       Serial.println("Connection failed");
     }
+  }
+
+  // IP address by hostname method. maybe this could replace above method?? 
+  if(err == 1){
+    Serial.print("IP address: ");
+    Serial.println(server);
+  } 
+  else {
+        Serial.print("Error code: ");
+        Serial.println(err);
   }
 
 }
