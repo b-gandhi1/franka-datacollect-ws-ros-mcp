@@ -91,7 +91,7 @@ rosrun automatepkg imutest.py # Run the server (which is also the publisher for 
 # start running the automatecams_2.py once this starts publishing. 
 
 ```
-## Troubleshooting
+# Troubleshooting
 * If `acm1` selected for board, may create issues. acm0 preffered. 
 ```
 sudo chmod 666 /dev/ttyACM0 # run in bash

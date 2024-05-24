@@ -58,7 +58,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     print("ERROR: No data received")
                     pass
                 
-                if check == 1: print('Publishing now...')
+                if check == 1: print('Publishing now...') # publishing check
                 
                 rotX_pub.publish(rotX)
                 rotY_pub.publish(rotY)
