@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-from std_msgs.msg import Float32, Int32 # , Float64MultiArray, Float32MultiArray
+from std_msgs.msg import Float32, Int32, String # , Float64MultiArray, Float32MultiArray
 from geometry_msgs.msg import PoseStamped
 import numpy as np
 import cv2 as cv # pip install opencv-python
@@ -10,15 +10,21 @@ import time
 import os
 import pandas as pd # pip install pandas
 import sys
+from movella_dot.msg import DotSensorMsg
+
 # import roboticstoolbox as rtb # pip install roboticstoolbox-python
 # from pyquaternion import Quaternion # pip install pyquaternion
 
 print('imports done successfully!')
 
+# init global variables
 pressure_snsr_val = 0.0
 pump_state = 0.0
 franka_position = np.empty(7)
 cam_trig = 0
+rotX = 0.0
+rotY = 0.0
+rotZ = 0.0
 
 # define constant parameters - in CAPS
 FPS = 10.0 # 10 fps
@@ -28,20 +34,35 @@ DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
 
 class automation():
-    # IMU ARDUINO-NANO33IOT SUB -------
-    def imuX_callback(data):
-        global rotX
-        rotX = data.data
-    def imuY_callback(data):
-        global rotY
-        rotY = data.data
-    def imu_sub():
+    # IMU NANO 33 IOT SUB -------
+    # def imuX_callback(data):
+    #     global rotX
+    #     rotX = data.data
+    # def imuY_callback(data):
+    #     global rotY
+    #     rotY = data.data
+    # def imuZ_callback(data):
+    #     global rotZ
+    #     rotZ = data.data
+    # def imu_sub():
+    #     try:
+    #         rospy.Subscriber('rotX', Float32, automation.imuX_callback)
+    #         rospy.Subscriber('rotY', Float32, automation.imuY_callback)
+    #         rospy.Subscriber('rotZ', Float32, automation.imuZ_callback)
+    #     except rospy.ROSInterruptException:
+    #         exit()
+    # -------------------
+    # IMU XSENS SUB -----
+    def xsens_callback(data):
+        global rotX, rotY, rotZ
+        rotX = data.Dot_Sens3.x
+        rotY = data.Dot_Sens3.y
+        rotZ = data.Dot_Sens3.z
+    def xsens_sub():
         try:
-            rospy.Subscriber('rotX', Float32, automation.imuX_callback)
-            rospy.Subscriber('rotY', Float32, automation.imuY_callback)
+            rospy.Subscriber('DOT_Pos', DotSensorMsg, automation.xsens_callback)
         except rospy.ROSInterruptException:
             exit()
-    # -------------------
     # ARDUINO UNO SUB -------
     def arduino_pressure_callback(data):
         global pressure_snsr_val
@@ -147,7 +168,7 @@ class automation():
             # time.sleep(1/FPS)
             elapsed_time = time.gmtime(time.time() - curr_time)
             elapsed_time_format = "{:02d}:{:02d}".format(elapsed_time.tm_min,elapsed_time.tm_sec)
-            print('Elapsed time: ',elapsed_time_format,' Frame: ',counter,'/',TOT_FRAMES)
+            print('Elapsed time: ',elapsed_time_format,' Frame: ',counter,'/',TOT_FRAMES,end="\r")
 
 
         web_writer.release()
@@ -181,7 +202,7 @@ class automation():
         pressure_snsr_vals = []
         pump_state_vals = []
         frankapos_vals = np.empty(7)
-        rotXvals, rotYvals = [], []
+        rotXvals, rotYvals, rotZvals = [], [], []
         
         tlf = pylon.TlFactory.GetInstance()
         # t1 = tlf.CreateTl('BaslerGigE')
@@ -207,7 +228,7 @@ class automation():
         fibrescope.AcquisitionMode.SetValue("Continuous")
         fibrescope.PixelFormat = "Mono8"
         
-        fib_root = os.path.join('src/automatecamspkg/src/outputs/fibrescope')
+        fib_root = os.path.join('src/automatecamspkg/src/outputs/imu_mcp_fusion')
         fib_filename = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
         fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),0)
         
@@ -237,6 +258,7 @@ class automation():
             # run subscribers alongside
             automation.arduino_sub()
             automation.franka_pos_sub()
+            automation.xsens_sub()
             
             counter_save.append(counter)
             timestamp.append(time.strftime("%H-%M-%S"))
@@ -245,6 +267,7 @@ class automation():
             frankapos_vals = np.vstack((frankapos_vals, franka_position)) # append for numpy to stack rows
             rotXvals.append(rotX)
             rotYvals.append(rotY)
+            rotZvals.append(rotZ)
             
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
@@ -253,7 +276,7 @@ class automation():
             # print('Iter: ',counter,'/',TOT_FRAMES)
             elapsed_time = time.gmtime(time.time() - curr_time)
             elapsed_time_format = "{:02d}:{:02d}".format(elapsed_time.tm_min,elapsed_time.tm_sec)
-            print('Elapsed time: ',elapsed_time_format,' Frame: ',counter,'/',TOT_FRAMES)
+            print('Elapsed time: ',elapsed_time_format,' Frame: ',counter,'/',TOT_FRAMES, end="\r")
             # time.sleep(1/FPS) # this is not needed, it messes with FPS.. 
             
         fib_writer.release()
@@ -268,10 +291,10 @@ class automation():
         frankapos_vals = frankapos_vals[1:,:]
         
         # save csv file
-        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','IMU Rx','IMU Ry','Franka Tx','Franka Ty','Franka Tz','Franka Rx','Franka Ry','Franka Rz','Franka Rw']
-        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,rotXvals,rotYvals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3],frankapos_vals[:,4],frankapos_vals[:,5],frankapos_vals[:,6]])
+        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','IMU X','IMU Y', 'IMU Z','Franka Tx','Franka Ty','Franka Tz','Franka Rx','Franka Ry','Franka Rz','Franka Rw']
+        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,rotXvals,rotYvals,rotZvals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3],frankapos_vals[:,4],frankapos_vals[:,5],frankapos_vals[:,6]])
         
-        root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/fibrescope')
+        root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/imu_mcp_fusion')
         filaname = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'
         
         df = pd.DataFrame(np.transpose(save_arr), columns=header)

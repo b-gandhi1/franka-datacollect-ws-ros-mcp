@@ -23,6 +23,7 @@ WiFiClient client;
 float x, y, z; // z unused
 float degX = 0.0;
 float degY = 0.0;
+String newval1, newval2;
 
 char *dtostrf (double val, signed char width, unsigned char prec, char *sout) {
   char fmt[20];
@@ -101,7 +102,11 @@ void loop() {
       dtostrf(degX, 5, 3, buffer); // Convert float to string with 5 digits and 3 decimal places
       strcat(buffer, ","); // Add a comma delimiter
       dtostrf(degY, 5, 3, buffer + strlen(buffer));
+      newval1 = String(degX);
+      newval2 = String(degY);
       client.println(buffer);
+//      client.println(newval1+","+newval2);
+//      Serial.println(newval1+","+newval2);
       //      client.stop();
     }
     else

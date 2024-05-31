@@ -4,11 +4,10 @@ import socket
 import rospy
 from std_msgs.msg import Float32
 import netifaces as ni
-import numpy
 
 # HOST = "143.167.51.103"  # Standard loopback interface address (localhost)
 HOST = ni.ifaddresses('enp0s31f6')[ni.AF_INET][0]['addr'] # get pc host automatically. 
-print("Current IP -addr HOST: ", HOST)
+print("Current IP-addr HOST: ", HOST)
 PORT = 2055  # Port to listen on (non-privileged ports are > 1023)
 FPS = 10 # Hz
 
@@ -24,6 +23,7 @@ def gyro_integrate(d_roll, d_pitch, d_yaw): # input is rate of change - i.e. ang
     yaw_z = yaw_z + d_yaw * dt 
     
     return roll_x, pitch_y, yaw_z # output is angle
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     rospy.init_node('imutest', anonymous=True) # ros node init
     rotX_pub = rospy.Publisher('rotX', Float32, queue_size=10)
@@ -44,10 +44,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     with conn:
         print(f"Connected by {addr}")
         while (not rospy.is_shutdown()):
-            data = conn.recv(1024).decode('utf-8').strip()
+            data = conn.recv(1024).decode('utf-8')
 
             try:
                 check = check+1
+                # print(data)
                 values = data.split(',')
                 X_raw = float(values[0])
                 Y_raw = float(values[1])
@@ -62,12 +63,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 
                 rotX_pub.publish(rotX)
                 rotY_pub.publish(rotY)
-                rate.sleep()
+                # rate.sleep()
                 # print('Received x rotation value:', rotX)
                 # print('Received y rotation value:', rotY)
                 # print("\n")
             
-            except ValueError: # this allows the code to execute with the data being passed as a string, and converts to float later.
+            except ValueError as e: # this allows the code to execute with the data being passed as a string, and converts to float later.
+                # print(e)
                 pass
             except rospy.ROSInterruptException:
                 break
