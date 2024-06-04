@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-from std_msgs.msg import Float32, Int32, String # , Float64MultiArray, Float32MultiArray
+from std_msgs.msg import Float32, Int32 # , Float64MultiArray, Float32MultiArray
 from geometry_msgs.msg import PoseStamped
 import numpy as np
 import cv2 as cv # pip install opencv-python

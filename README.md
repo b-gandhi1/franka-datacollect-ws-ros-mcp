@@ -85,7 +85,7 @@ ros2 launch franka_gripper gripper.launch.py robot_ip:=173.16.0.2 # launch gripp
 
 ros2 action send_goal /panda_gripper/gripper_action control_msgs/action/GripperCommand "{command: {position: 0.022, max_effort: -1}}" # OPEN GRIPPER
 
-{width: 0.0, force: 40.0, speed: 0.1,  epsilon:{inner: 0.08, outer: 0.08}}" # SECURE GRIPPER
+ros2 action send_goal /panda_gripper/grasp franka_msgs/action/Grasp "{width: 0.0, force: 40.0, speed: 0.1,  epsilon:{inner: 0.08, outer: 0.08}}" # SECURE GRIPPER
 ```
 *Gripper must be secured to mannequin prior to motion execution.* 
 
@@ -93,7 +93,14 @@ ros2 action send_goal /panda_gripper/gripper_action control_msgs/action/GripperC
 #### Motion execution
 ```
 # HARDWARE
-ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=173.16.0.2 
+ros2 run motionmannequin external_force # needs running once to set joint torques
+# above line enables issues around payload for moving heavy mannequin head!
+
+# and finally run the motion file:
+ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=173.16.0.2
+
+# OR - use shell script for above: 
+sh run_prog_commands.sh
 
 # SIMULATION
 ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=dont_care use_fake_hardware:=true
