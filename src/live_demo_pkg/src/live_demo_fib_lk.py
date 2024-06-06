@@ -29,7 +29,7 @@ def fibrescope_process(frame):
     mask_blank = np.zeros_like(gray,dtype='uint8') # ,dtype='uint8'
     # x,y,w,h = 350,280,200,110 # after resizing frame size. 
     # rect = cv.rectangle(mask_blank, (x, y), (x+w, y+h), (255,255,255), -1) # mask apply
-    circle = cv.circle(mask_blank, (340,110), 100, (255,255,255), -1)
+    circle = cv.circle(mask_blank, (400,270), 100, (255,255,255), -1)
     masked = cv.bitwise_and(gray,gray,mask=circle)
     brightened = cv.addWeighted(masked, CONTRAST, np.zeros(masked.shape, masked.dtype), 0, BRIGHTNESS)     
     # binary = cv.threshold(brightened,57,255,cv.THRESH_BINARY)[1] # might remove: + cv.thresh_otsu

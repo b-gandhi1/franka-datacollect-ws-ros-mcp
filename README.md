@@ -125,11 +125,24 @@ Run live demo using the following:
 * Firstly, run `roscore`
 * Publish arduino vals:  `rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0 _baud:=57600` 
 * Finally, run the cameras and motion estimation algorithms: 
-  * For fibrescope, lukas kanade: `rosrun live_demo_pkg live_demo_fib_lk.py`
-  * For webcam - `rosrun live_demo_pkg live_demo_web_lk.py`
+  ```
+
+  # For fibrescope, lukas kanade: 
+  rosrun live_demo_pkg live_demo_fib_lk.py
+
+  # For webcam 
+  rosrun live_demo_pkg live_demo_web_lk.py
+
+  ```
+  
 * To open plotjuggler for ros1: `rosrun plotjuggler plotjuggler`
   * load the xml file in this directory called: `mcp_livedemo_fib_lk_ros1.xml`
-* rqt_plot is another option: `rosrun rqt_plot rqt_plot`
+  * or use below command: 
+  ```
+  rosrun plotjuggler plotjuggler -l mcp_livedemo_fib_lk_ros1.xml
+  ```
+  * xml file also available for webcam. 
+* rqt_plot is another option: `rosrun rqt_plot rqt_plot` but stick with plotjuggler for now. 
 
 # Arduino nano 33 IOT - IMU tests !IGNORE!
 *This is no longer being used, XSENS IMU sensor is being used instead now.*
