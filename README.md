@@ -148,3 +148,8 @@ rosrun automatepkg imutest.py # Run the server (which is also the publisher for 
 # start running the automatecams_2.py once this starts publishing. 
 
 ```
+
+# Notes 
+## video output
+* in grayscale but read as rgb then convert to grayscale
+* flip upside down (vertically)
