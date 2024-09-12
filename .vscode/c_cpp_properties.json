@@ -4,8 +4,9 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/home/bhoomika/franka-datacollect-ws-ros-mcp/src/polaris_pkg",
-                "/opt/ros/noetic/include/**"
+                "/home/bhoomika/franka-datacollect-ws-ros-mcp/**",
+                "/opt/ros/noetic/include/**",
+                "/usr/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

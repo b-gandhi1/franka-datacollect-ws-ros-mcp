@@ -9,7 +9,7 @@ project(participant_pkg)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
-  movella_dot
+  # movella_dot
   rospy
   std_msgs
 )

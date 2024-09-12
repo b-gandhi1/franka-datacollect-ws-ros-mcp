@@ -70,8 +70,8 @@ ros2 run ros1_bridge dynamic_bridge # final command
 
 
 ```
-### polaris pubisher !!IGNORE!!
-run polaris publisher package in this workspace `rosrun ndisensor stray_position_pub 169.254.158.253`
+### polaris pubisher - FOR PARTICIPANT STUDY
+run polaris publisher package in this workspace `rosrun polaris_pkg object_tracking 169.254.158.253 --tools=<path of rom file>`
 ### franka publisher and motion execute
 Sourcing for each terminal
 ```
@@ -112,7 +112,7 @@ ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=dont_care use_fa
 1. fibrescope sometimes does not work. to solve this open camera with pylon and close > run code again. 
 2. sometimes the camera trigger does not get registered, along with other ros2 to ros1 communication. Restart `ros1-bridge` to solve this. 
 3. RT Kernel: Sometimes ROS crashes while running on laptop. Easy fix: connect laptop charger! :) 
-4. If `acm1` selected for board, may create issues. acm0 preffered. 
+4. If `acm1` selected for arduino board, may create issues. `acm0` preffered. 
    ```
    sudo chmod 666 /dev/ttyACM0 # run in bash
    # then log out and in again into laptop. 

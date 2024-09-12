@@ -118,16 +118,34 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
   /home/bhoomika/franka-datacollect-ws-ros-mcp/devel/
-  /home/bhoomika/franka-datacollect-ws-ros-mcp/mcp_datacollect_env/bin/activate
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/polaris_pkg.cpp
 # )
+
+add_executable(object_tracking src/object_tracking.cpp)
+target_link_libraries(object_tracking ${catkin_LIBRARIES} /usr/lib64/polaris/CombinedApi.cpp /usr/lib64/polaris/SystemCRC.cpp
+/usr/lib64/polaris/BufferedReader.cpp
+/usr/lib64/polaris/ComConnection.cpp
+/usr/lib64/polaris/TcpConnection.cpp
+/usr/lib64/polaris/UdpSocket.cpp
+/usr/lib64/polaris/PortHandleInfo.cpp
+/usr/lib64/polaris/GbfContainer.cpp
+/usr/lib64/polaris/GbfComponent.cpp
+/usr/lib64/polaris/GbfFrame.cpp
+/usr/lib64/polaris/ToolData.cpp
+/usr/lib64/polaris/Transform.cpp
+/usr/lib64/polaris/GbfButton1D.cpp
+/usr/lib64/polaris/GbfData3D.cpp
+/usr/lib64/polaris/GbfData6D.cpp
+/usr/lib64/polaris/GbfSystemAlert.cpp
+/usr/lib64/polaris/MarkerData.cpp
+/usr/lib64/polaris/SystemAlert.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
