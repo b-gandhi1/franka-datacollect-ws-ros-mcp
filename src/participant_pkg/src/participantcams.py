@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rospy
-from std_msgs.msg import Float32, Int32 # , Float64MultiArray, Float32MultiArray
-from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Float32 #, Int32 , Float64MultiArray, Float32MultiArray
+# from geometry_msgs.msg import PoseStamped
 import numpy as np
 import cv2 as cv # pip install opencv-python
 from pypylon import pylon # cd pypylon > pip install .
@@ -11,7 +11,6 @@ import os
 import pandas as pd # pip install pandas
 import sys
 from movella_dot.msg import DotSensorMsg
-from scipy.spatial.transform import Rotation as R
 # import roboticstoolbox as rtb # pip install roboticstoolbox-python
 # from pyquaternion import Quaternion # pip install pyquaternion
 
@@ -20,11 +19,13 @@ print('imports done successfully!')
 # init global variables
 pressure_snsr_val = 0.0
 pump_state = 0.0
-franka_position = np.empty(7)
-cam_trig = 0
 rotX = 0.0
 rotY = 0.0
 rotZ = 0.0
+polaris_pos = np.empty(6)
+
+motion_type = ""
+num = None
 
 # define constant parameters - in CAPS
 FPS = 10.0 # 10 fps
@@ -63,10 +64,18 @@ class automation():
     # POLARIS SUB ----
     def polaris_callback(data):
         global polaris_pos
-        polaris_pos = data.data
+        Tx = data.pose.position.x
+        Ty = data.pose.position.y
+        Tz = data.pose.position.z
+        Rx = data.pose.orientation.x # roll x
+        Ry = data.pose.orientation.y # pitch y
+        Rz = data.pose.orientation.z # yaw z 
+        # rotations in euler format already 
+        polaris_pos = np.array([Tx,Ty,Tz,Rx,Ry,Rz]) 
+        
     def polaris_sub():
         try:
-            rospy.Subscriber('polaris_pos', Float32, automation.polaris_callback)
+            rospy.Subscriber('Marker_Pos', Float32, automation.polaris_callback)
         except rospy.ROSInterruptException:
             exit()
     # --------------------
@@ -84,7 +93,7 @@ class automation():
     # # ---------------------
     
     # FIBRESCOPE -------------
-    def fibrescope_execute():
+    def fibrescope_execute(num, motion_type):
         print("Fibrescope execution selected.")
         
         # storage vals
@@ -92,7 +101,7 @@ class automation():
         timestamp = []
         pressure_snsr_vals = []
         pump_state_vals = []
-        frankapos_vals = np.empty(7)
+        polaris_vals = np.empty(6)
         rotXvals, rotYvals, rotZvals = [], [], []
         
         tlf = pylon.TlFactory.GetInstance()
@@ -148,14 +157,14 @@ class automation():
             
             # run subscribers alongside
             automation.arduino_sub()
-            automation.franka_pos_sub()
+            automation.polaris_sub()
             automation.xsens_sub()
             
             counter_save.append(counter)
             timestamp.append(time.strftime("%H-%M-%S"))
             pressure_snsr_vals.append(pressure_snsr_val)
             pump_state_vals.append(pump_state)
-            frankapos_vals = np.vstack((frankapos_vals, franka_position)) # append for numpy to stack rows
+            polaris_vals = np.vstack((polaris_vals, polaris_pos)) # append for numpy to stack rows
             rotXvals.append(rotX)
             rotYvals.append(rotY)
             rotZvals.append(rotZ)
@@ -179,11 +188,11 @@ class automation():
         
         # conversions
         # frankapos_vals = np.asarray(frankapos_vals) # tuple to array
-        frankapos_vals = frankapos_vals[1:,:]
+        polaris_vals = polaris_vals[1:,:]
         
         # save csv file
-        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','IMU X','IMU Y', 'IMU Z','Franka Tx','Franka Ty','Franka Tz','Franka Rx','Franka Ry','Franka Rz','Franka Rw']
-        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,rotXvals,rotYvals,rotZvals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3],frankapos_vals[:,4],frankapos_vals[:,5],frankapos_vals[:,6]])
+        header = ['Counter','Timestamp','Pressure (kPa)','Pump State','IMU X','IMU Y', 'IMU Z','Polaris Tx','Polaris Ty','Polaris Tz','Polaris Rx','Polaris Ry','Polaris Rz']
+        save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,rotXvals,rotYvals,rotZvals,polaris_vals[:,0],polaris_vals[:,1],polaris_vals[:,2],polaris_vals[:,3],polaris_vals[:,4],polaris_vals[:,5]])
         
         root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/participant_pkg/src/outputs/participant'+num)
         filaname = 'fibrescope-'+motion_type+'-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'
@@ -195,13 +204,6 @@ class automation():
     # ---------------------
 # MAIN --------------------
 def main(num,motion_type):
-
-    
-    automation.franka_trigger_sub() # camera trigger from franka, sent when franka starts moving
-    print('Waiting for cam trigger from franka...')
-    while(cam_trig != 1):
-        # print(cam_trig)
-        pass
     
     try:
         automation.fibrescope_execute(num,motion_type)
@@ -210,8 +212,8 @@ def main(num,motion_type):
         pass
 # ------------------------- 
 if __name__ == '__main__':
-    num = sys.argv[1]
-    motion_type = sys.argv[2]
+    num = sys.argv[1] # participant number
+    motion_type = sys.argv[2] # pitch | roll | trans
     # device = rospy.get_param('auto_selected_cam/cam_select') # node_name/argsname
     # if device == 0:
         # device = input("Enter relevant letter for camera selection: 'w' - webcam; 'f' - fibrescope : ")
