@@ -1,13 +1,15 @@
 # franka-datacollect-ws-ros-mcp
-Data collecting from MCP using the franka arm. Data collection from webcam and fibrescope. 
+Data collecting from MCP 
 
 ## Steps to run the automation file `automatecams.py`
+
+Data colleciton using the franka arm. Data collection from webcam and fibrescope. 
 1. Ensure all devices are connected via the network switch.
 2. Ensure the IP addresses are all set properly under ipv4 settings, refer to notion for this. 
 3. Franka set-up:
    1. Go to the browser and franka's ip address: https://173.16.0.2/desk/ 
    2. To control via code: click `Activate FCI`
-### Terminal for franka automation and data collection
+## Terminal for franka automation and data collection
 ```
 cd franka-datacollect-ws-ros-mcp
 
@@ -27,7 +29,11 @@ rosrun automatecamspkg automatecams_2.py <s>
 # where 's' = 'w' or 'f' for webcam or fibrescope respectively
 ``` 
 
-### Run roscore and the programs depending on this
+Further troubleshooting for sourcing movella_dot into the franka workspace refer to this link: 
+https://www.theconstruct.ai/overlaying-ros-workspaces/ 
+
+
+## Run roscore and the programs depending on this
 This includes the following: 
 * Rosserial for arduino uno
   * pump status
@@ -70,16 +76,16 @@ ros2 run ros1_bridge dynamic_bridge # final command
 
 
 ```
-### polaris pubisher - FOR PARTICIPANT STUDY
-run polaris publisher package in this workspace `rosrun polaris_pkg object_tracking 169.254.158.253 --tools=<path of rom file>`
-### franka publisher and motion execute
+
+## franka publisher and motion execute
 Sourcing for each terminal
 ```
 cd ~/ros2-franka-ws
 source /opt/ros/foxy/setup.bash
 source install/setup.bash
 ```
-#### Gripper commands: 
+
+### Gripper commands: 
 ```
 ros2 launch franka_gripper gripper.launch.py robot_ip:=173.16.0.2 # launch gripper
 
@@ -90,7 +96,7 @@ ros2 action send_goal /panda_gripper/grasp franka_msgs/action/Grasp "{width: 0.0
 *Gripper must be secured to mannequin prior to motion execution.* 
 
 
-#### Motion execution
+### Motion execution
 ```
 # HARDWARE
 ros2 run motionmannequin external_force # needs running once to set joint torques
@@ -108,7 +114,7 @@ ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=dont_care use_fa
 
 *Simulation opens RVIZ, and robot starts to move. Upon connection, it should send a trigger to the camera automation to start recording. So both should start at the same time.* 
 
-## Troubleshooting
+## Troubleshooting for automatecams
 1. fibrescope sometimes does not work. to solve this open camera with pylon and close > run code again. 
 2. sometimes the camera trigger does not get registered, along with other ros2 to ros1 communication. Restart `ros1-bridge` to solve this. 
 3. RT Kernel: Sometimes ROS crashes while running on laptop. Easy fix: connect laptop charger! :) 
@@ -119,6 +125,19 @@ ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=dont_care use_fa
    # try uploading again. 
    ``` 
 5. If NOT connecting to server, may be because of IP address changes. It updates every week on laptop. This needs to reflect in code for server and in the python sketch. 
+
+# PARTICIPANT STUDY
+Polaris pubisher and subscriber
+ 
+```
+rosrun polaris_pkg object_tracking 169.254.158.253 --tools=<path of rom file> # run polaris publisher package
+
+rosrun participant_pkg participantcams.py <participant_num> <motion_type> # run subscribers
+
+# to test just the polaris subscriber: 
+rosrun participant_pkg trial2_polaris_sub # subscriber for only polaris
+
+```
 
 # LIVE DEMO
 Run live demo using the following: 

@@ -15,12 +15,14 @@ TOT_FRAMES = int(FPS*60) # 10 fps, 60 secs (1 min) long recording
 motion_type = ""
 num = None
 
-polaris_pos = np.empty(6)
-
-class automation_trial():
-
-    def polaris_callback(data):
-        global polaris_pos
+class automation_trial():    
+    def __init__(self):
+        self.polaris_pos = np.empty(6)
+        rospy.Subscriber('Marker_Pos', PoseStamped, self.polaris_callback)
+        print("hi")
+        self.recording_func_trial()
+        
+    def polaris_callback(self,data):
         Tx = data.pose.position.x
         Ty = data.pose.position.y
         Tz = data.pose.position.z
@@ -28,25 +30,14 @@ class automation_trial():
         Ry = data.pose.orientation.y # pitch y
         Rz = data.pose.orientation.z # yaw z 
         # rotations in euler format already 
-        polaris_pos = np.array([Tx,Ty,Tz,Rx,Ry,Rz]) 
+        self.polaris_pos = np.array([Tx,Ty,Tz,Rx,Ry,Rz])         
         
-    def polaris_sub():
-        try:
-            rospy.Subscriber('Marker_Pos', PoseStamped, automation_trial.polaris_callback)
-        except rospy.ROSInterruptException:
-            exit()
-    def recording_func_trial():
+    def recording_func_trial(self):
+        
         print("Fibrescope execution selected.")
-        polaris_vals = np.empty(6)
         
         # for counter in range(TOT_FRAMES):
-        while True:
-            
-            # run subscribers alongside
-            automation_trial.polaris_sub()
-            
-            polaris_vals = polaris_pos 
-            
+        while not rospy.is_shutdown():         
             # if KeyboardInterrupt:
             #     print('KeyboardInterrupt. Quitting...')
             #     break
@@ -56,8 +47,7 @@ class automation_trial():
             # elapsed_time_format = "{:02d}:{:02d}".format(elapsed_time.tm_min,elapsed_time.tm_sec)
             # print('Elapsed time: ',elapsed_time_format,' Frame: ',counter,'/',TOT_FRAMES, end="\r")
             time.sleep(1/FPS) # this is not needed, it messes with FPS.. 
-            print("Polaris position: ", polaris_vals[2:5], end="\r")
-        
+            print("Polaris position: ", self.polaris_pos[3:6], end="\r")
         # print("Recording has finished. Saving data...")
         
         # # frankapos_vals = np.asarray(frankapos_vals) # tuple to array
@@ -76,14 +66,16 @@ class automation_trial():
         # print("Finished saving data.")
 def main():
     try:
-        automation_trial.recording_func_trial()
+        rospy.init_node("Polaris_subscriber", anonymous=True)
+        obj = automation_trial()
+        # rospy.spin()
     except KeyboardInterrupt:
-        print('*****ERROR: Manually interrupted*****')
-        pass
+        print('\n*****ERROR: Manually interrupted*****')
+        exit()
     
 if __name__ == '__main__':
-    num = sys.argv[1] # participant number
-    motion_type = sys.argv[2] # pitch | roll | trans
+    # num = sys.argv[1] # participant number
+    # motion_type = sys.argv[2] # pitch | roll | trans
     # device = rospy.get_param('auto_selected_cam/cam_select') # node_name/argsname
     # if device == 0:
         # device = input("Enter relevant letter for camera selection: 'w' - webcam; 'f' - fibrescope : ")

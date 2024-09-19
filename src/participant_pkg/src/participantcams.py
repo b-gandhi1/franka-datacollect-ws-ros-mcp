@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 from std_msgs.msg import Float32 #, Int32 , Float64MultiArray, Float32MultiArray
-# from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped
 import numpy as np
 import cv2 as cv # pip install opencv-python
 from pypylon import pylon # cd pypylon > pip install .
@@ -16,14 +16,7 @@ from movella_dot.msg import DotSensorMsg
 
 print('imports done successfully!')
 
-# init global variables
-pressure_snsr_val = 0.0
-pump_state = 0.0
-rotX = 0.0
-rotY = 0.0
-rotZ = 0.0
-polaris_pos = np.empty(6)
-
+# init input variables 
 motion_type = ""
 num = None
 
@@ -35,35 +28,52 @@ DESIREDWIDTH = 640
 DESIREDHEIGHT = 480
 
 class automation():
+    
+    def __init__(self):
+        # init obj variables
+        self.pressure_snsr_val = 0.0
+        self.pump_state = 0.0
+        self.rotX = 0.0
+        self.rotY = 0.0
+        self.rotZ = 0.0
+        self.polaris_pos = np.empty(6)
+        
+        # subscribers to call callbacks: 
+        rospy.Subscriber('Marker_Pos', PoseStamped, self.polaris_callback)
+        rospy.Subscriber('DOT_Pos', DotSensorMsg, self.xsens_callback)
+        rospy.Subscriber('pressure_val', Float32, self.arduino_pressure_callback)
+        rospy.Subscriber('pump_state', Float32, self.arduino_pumpstatus_callback)
+        
+        self.fibrescope_execute()
+        
     # IMU XSENS SUB -----
-    def xsens_callback(data):
-        global rotX, rotY, rotZ
-        rotX = data.Dot_Sens4.x
-        rotY = data.Dot_Sens4.y
-        rotZ = data.Dot_Sens4.z
-    def xsens_sub():
-        try:
-            rospy.Subscriber('DOT_Pos', DotSensorMsg, automation.xsens_callback)
-        except rospy.ROSInterruptException:
-            exit()
+    def xsens_callback(self,data):
+        self.rotX = data.Dot_Sens3.x
+        self.rotY = data.Dot_Sens3.y
+        self.rotZ = data.Dot_Sens3.z
+    # def xsens_sub():
+    #     try:
+    #         rospy.Subscriber('DOT_Pos', DotSensorMsg, automation.xsens_callback)
+    #     except rospy.ROSInterruptException:
+    #         exit()
+    
+    # --------------------
+    
     # ARDUINO UNO SUB -------
-    def arduino_pressure_callback(data):
-        global pressure_snsr_val
-        pressure_snsr_val = data.data
-    def arduino_pumpstatus_callback(data):
-        global pump_state
-        pump_state = data.data
-    def arduino_sub():
-        try:
-            rospy.Subscriber('pressure_val', Float32, automation.arduino_pressure_callback)
-            rospy.Subscriber('pump_state', Float32, automation.arduino_pumpstatus_callback)
-        except rospy.ROSInterruptException:
-            exit()
+    def arduino_pressure_callback(self,data):
+        self.pressure_snsr_val = data.data
+    def arduino_pumpstatus_callback(self,data):
+        self.pump_state = data.data
+    # def arduino_sub():
+    #     try:
+    #         rospy.Subscriber('pressure_val', Float32, automation.arduino_pressure_callback)
+    #         rospy.Subscriber('pump_state', Float32, automation.arduino_pumpstatus_callback)
+    #     except rospy.ROSInterruptException:
+    #         exit()
     # --------------------
     
     # POLARIS SUB ----
-    def polaris_callback(data):
-        global polaris_pos
+    def polaris_callback(self,data):
         Tx = data.pose.position.x
         Ty = data.pose.position.y
         Tz = data.pose.position.z
@@ -71,29 +81,17 @@ class automation():
         Ry = data.pose.orientation.y # pitch y
         Rz = data.pose.orientation.z # yaw z 
         # rotations in euler format already 
-        polaris_pos = np.array([Tx,Ty,Tz,Rx,Ry,Rz]) 
+        self.polaris_pos = np.array([Tx,Ty,Tz,Rx,Ry,Rz]) 
         
-    def polaris_sub():
-        try:
-            rospy.Subscriber('Marker_Pos', Float32, automation.polaris_callback)
-        except rospy.ROSInterruptException:
-            exit()
-    # --------------------
-    
-    # FRANKA TRIG SUB ----
-    # def franka_trigger_callback(data):
-    #     global cam_trig
-    #     cam_trig = data.data
-    # def franka_trigger_sub():
+    # def polaris_sub():
     #     try:
-    #         rospy.init_node('franka_trigger_camera', anonymous=True)
-    #         rospy.Subscriber('camera_trigger', Int32, automation.franka_trigger_callback) 
+    #         rospy.Subscriber('Marker_Pos', Float32, automation.polaris_callback)
     #     except rospy.ROSInterruptException:
     #         exit()
-    # # ---------------------
+    # --------------------
     
     # FIBRESCOPE -------------
-    def fibrescope_execute(num, motion_type):
+    def fibrescope_execute(self):
         print("Fibrescope execution selected.")
         
         # storage vals
@@ -128,7 +126,7 @@ class automation():
         fibrescope.AcquisitionMode.SetValue("Continuous")
         fibrescope.PixelFormat = "Mono8"
         
-        fib_root = os.path.join('src/automatecamspkg/src/outputs/participant'+num)
+        fib_root = os.path.join('src/participant_pkg/src/outputs/participant'+str(num))
         fib_filename = 'fibrescope-'+motion_type+'-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
         fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),0)
         
@@ -155,19 +153,14 @@ class automation():
             cv.imshow("Fibrescope recording", bgr_img)
             fib_writer.write(bgr_img)
             
-            # run subscribers alongside
-            automation.arduino_sub()
-            automation.polaris_sub()
-            automation.xsens_sub()
-            
             counter_save.append(counter)
             timestamp.append(time.strftime("%H-%M-%S"))
-            pressure_snsr_vals.append(pressure_snsr_val)
-            pump_state_vals.append(pump_state)
-            polaris_vals = np.vstack((polaris_vals, polaris_pos)) # append for numpy to stack rows
-            rotXvals.append(rotX)
-            rotYvals.append(rotY)
-            rotZvals.append(rotZ)
+            pressure_snsr_vals.append(self.pressure_snsr_val)
+            pump_state_vals.append(self.pump_state)
+            polaris_vals = np.vstack((polaris_vals, self.polaris_pos)) # append for numpy to stack rows
+            rotXvals.append(self.rotX)
+            rotYvals.append(self.rotY)
+            rotZvals.append(self.rotZ)
             
             if cv.waitKey(10) & 0xFF == ord('q'):
                 print('Quitting...')
@@ -203,13 +196,15 @@ class automation():
         print("Finished saving data.")        
     # ---------------------
 # MAIN --------------------
-def main(num,motion_type):
+def main():
     
     try:
-        automation.fibrescope_execute(num,motion_type)
+        rospy.init_node('participant_subs', anonymous=True)
+        automation() # or obj=automation()automation
+                
     except KeyboardInterrupt:
         print('*****ERROR: Manually interrupted*****')
-        pass
+        exit()
 # ------------------------- 
 if __name__ == '__main__':
     num = sys.argv[1] # participant number
@@ -218,4 +213,4 @@ if __name__ == '__main__':
     # if device == 0:
         # device = input("Enter relevant letter for camera selection: 'w' - webcam; 'f' - fibrescope : ")
     # get parameter sys python
-    main(num,motion_type)
+    main()
