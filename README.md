@@ -42,7 +42,7 @@ This includes the following:
 * rosbridge - to pass values between ros1 and ros2
 
 ```
-source /opt/ros/noetic/setup.bash`
+source /opt/ros/noetic/setup.bash
 roscore
 ```
 Next terminal, source ros1 again and then: 

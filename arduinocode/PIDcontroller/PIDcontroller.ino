@@ -13,9 +13,9 @@ ros::Publisher pump_state("pump_state",&msg1);
 ros::Publisher pressure_val("pressure_val",&msg2);
 
 //PID constants
-double kp = 1;
-double ki = 7;
-double kd = 5;
+double kp = 8.0;
+double ki = 5.0;
+double kd = 10.0;
 
 unsigned long currentTime, previousTime;
 double elapsedTime;
@@ -45,7 +45,7 @@ double voltP;
 double kPa; // variable1 to publish
 double pump_state_est; // variable2 to publish
 double valve_dir_val; // variable for valve openness to release high pressures
-double Setpoint = 2.00; // kPa. Not 6 kPa since that is max saturation point for the sensor.
+double Setpoint = 1.70; // kPa. Not 6 kPa since that is max saturation point for the sensor.
 
 void setup() {
   int baudrate = 57600;
@@ -77,7 +77,7 @@ void loop() {
 //  output = computePID(input);
 //  delay(100);
 //  analogWrite(3, output); //control the motor based on PID value
-
+  
   air_pressure_val = analogRead(air_pressure_pin);
   
   // convert ASCII to voltage
@@ -124,14 +124,22 @@ double computePID(double inp) {
   lastError = error; //remember current error
   previousTime = currentTime; //remember current time
 
-  if (error <= 0.10)
+  if ( error <= 0.05)
     {
       // close valve
 //      digitalWrite(VALVE_PWM, HIGH);
-      digitalWrite(VALVE_DIR, LOW); 
+      analogWrite(VALVE_DIR, 130); 
       digitalWrite(PUMP_DIR, LOW); 
       digitalWrite(PUMP_PWM, LOW);
       delay(20);
     }
+  else
+  {
+//    digitalWrite(VALVE_PWM, LOW);
+    digitalWrite(VALVE_DIR, LOW);
+    digitalWrite(PUMP_DIR, LOW); 
+    delay(20);
+  }
+
   return out/1000;                                        //have function return the PID output
 }

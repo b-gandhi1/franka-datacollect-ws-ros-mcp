@@ -94,7 +94,7 @@ std::string getToolInfo(std::string toolHandle)
 void initializeAndEnableTools(std::vector<ToolData> &enabledTools)
 {
 	std::cout << std::endl
-			  << "Initializing and enabling tools..." << std::endl;
+				<< "Initializing and enabling tools..." << std::endl;
 
 	// Initialize and enable tools
 	std::vector<PortHandleInfo> portHandles = capi.portHandleSearchRequest(PortHandleSearchRequestOption::NotInit);
@@ -166,7 +166,7 @@ void DetermineEuler(RotationMatrix dtRotMatrix, Rotation *pdtEulerRot)
 	pdtEulerRot->fRoll = fRoll;
 	pdtEulerRot->fPitch = atan2(-dtRotMatrix[2][0],
 								(fCosRoll * dtRotMatrix[0][0]) + (fSinRoll *
-																  dtRotMatrix[1][0]));
+																	dtRotMatrix[1][0]));
 	pdtEulerRot->fYaw = atan2(
 		(fSinRoll * dtRotMatrix[0][2]) -
 			(fCosRoll * dtRotMatrix[1][2]),
@@ -240,7 +240,7 @@ std::string toolDataPublisher(const ToolData &toolData, ros::Publisher new_marke
 	std::stringstream stream;
 	stream << std::setprecision(toolData.PRECISION) << std::setfill('0');
 	stream << "" << static_cast<unsigned>(toolData.frameNumber) << ","
-		   << "Port:" << static_cast<unsigned>(toolData.transform.toolHandle) << ",";
+			<< "Port:" << static_cast<unsigned>(toolData.transform.toolHandle) << ",";
 	stream << static_cast<unsigned>(toolData.transform.getFaceNumber()) << ",";
 
 	geometry_msgs::PoseStamped msg;
@@ -252,8 +252,8 @@ std::string toolDataPublisher(const ToolData &toolData, ros::Publisher new_marke
 	else
 	{
 		stream << TransformStatus::toString(toolData.transform.getErrorCode()) << ","
-			   << toolData.transform.q0 << "," << toolData.transform.qx << "," << toolData.transform.qy << "," << toolData.transform.qz << ","
-			   << toolData.transform.tx << "," << toolData.transform.ty << "," << toolData.transform.tz << "," << toolData.transform.error;
+				<< toolData.transform.q0 << "," << toolData.transform.qx << "," << toolData.transform.qy << "," << toolData.transform.qz << ","
+				<< toolData.transform.tx << "," << toolData.transform.ty << "," << toolData.transform.tz << "," << toolData.transform.error;
 
 		// Publish Data
 		// double pos_mat[4][1] = {{toolData.transform.tx},{toolData.transform.ty},{toolData.transform.tz},(1.0)};
@@ -293,8 +293,8 @@ std::string toolDataPublisher(const ToolData &toolData, ros::Publisher new_marke
 void printToolData(const ToolData &toolData, ros::Publisher marker_pub)
 {
 	std::cout << std::endl
-			  << "Entered Print tool data function"
-			  << "\n";
+				<< "Entered Print tool data function"
+				<< "\n";
 
 	// Detects any alerts for e.g. low temperature, and prints them to the screen
 	if (toolData.systemAlerts.size() > 0)
@@ -332,19 +332,19 @@ int main(int argc, char *argv[])
 	if (argc < 2 || argc > 4)
 	{
 		std::cout << "CAPIsample Ver " << capi.getVersion() << std::endl
-				  << "usage: ./capisample <hostname> [args]" << std::endl
-				  << "where:" << std::endl
-				  << "    <hostname>      (required) The measurement device's hostname, IP address, or serial port." << std::endl
-				  << "    [args]          (optional) Any other arguments such as tools to load, or SCU to connect to." << std::endl
-				  << "example hostnames:" << std::endl
-				  << "    Connecting to device by IP address: 169.254.8.50" << std::endl
-				  << "    Connecting to device by hostname: P9-B0103.local" << std::endl
-				  << "    Connecting to serial port varies by operating system:" << std::endl
-				  << "        COM10 (Windows), /dev/ttyUSB0 (Linux), /dev/cu.usbserial-001014FA (Mac)" << std::endl
-				  << "Optional arguments:" << std::endl
-				  << "--scu=[scu_hostname] A System Control Unit (SCU) hostname, used to connect active tools." << std::endl
-				  << "--stream=UDP Specify the streaming protocol as UDP (default is TCP)" << std::endl
-				  << "--tools=[file1.rom],[file2.rom]... A comma delimited list of tools to load." << std::endl;
+					<< "usage: ./capisample <hostname> [args]" << std::endl
+					<< "where:" << std::endl
+					<< "    <hostname>      (required) The measurement device's hostname, IP address, or serial port." << std::endl
+					<< "    [args]          (optional) Any other arguments such as tools to load, or SCU to connect to." << std::endl
+					<< "example hostnames:" << std::endl
+					<< "    Connecting to device by IP address: 169.254.8.50" << std::endl
+					<< "    Connecting to device by hostname: P9-B0103.local" << std::endl
+					<< "    Connecting to serial port varies by operating system:" << std::endl
+					<< "        COM10 (Windows), /dev/ttyUSB0 (Linux), /dev/cu.usbserial-001014FA (Mac)" << std::endl
+					<< "Optional arguments:" << std::endl
+					<< "--scu=[scu_hostname] A System Control Unit (SCU) hostname, used to connect active tools." << std::endl
+					<< "--stream=UDP Specify the streaming protocol as UDP (default is TCP)" << std::endl
+					<< "--tools=[file1.rom],[file2.rom]... A comma delimited list of tools to load." << std::endl;
 		return -1;
 	}
 
@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
 	initializeAndEnableTools(enabledTools);
 
 	std::cout << std::endl
-			  << "Entering tracking mode..." << std::endl;
+				<< "Entering tracking mode..." << std::endl;
 	onErrorPrintDebugMessage("capi.startTracking()", capi.startTracking());
 
 	while (ros::ok())
@@ -424,7 +424,7 @@ int main(int argc, char *argv[])
 
 	// Stop tracking (back to configuration mode)
 	std::cout << std::endl
-			  << "Leaving tracking mode and returning to configuration mode..." << std::endl;
+				<< "Leaving tracking mode and returning to configuration mode..." << std::endl;
 	onErrorPrintDebugMessage("capi.stopTracking()", capi.stopTracking());
 
 	// exit

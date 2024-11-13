@@ -228,7 +228,7 @@ class automation():
         fibrescope.AcquisitionMode.SetValue("Continuous")
         fibrescope.PixelFormat = "Mono8"
         
-        fib_root = os.path.join('src/automatecamspkg/src/outputs/imu_mcp_fusion2')
+        fib_root = os.path.join('src/automatecamspkg/src/outputs/skins-test')
         fib_filename = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.mp4'
         fib_writer = cv.VideoWriter(os.path.join(fib_root,fib_filename),cv.VideoWriter_fourcc(*'mp4v'),FPS,(DESIREDWIDTH,DESIREDHEIGHT),0)
         
@@ -294,7 +294,7 @@ class automation():
         header = ['Counter','Timestamp','Pressure (kPa)','Pump State','IMU X','IMU Y', 'IMU Z','Franka Tx','Franka Ty','Franka Tz','Franka Rx','Franka Ry','Franka Rz','Franka Rw']
         save_arr = np.array([counter_save,timestamp,pressure_snsr_vals,pump_state_vals,rotXvals,rotYvals,rotZvals,frankapos_vals[:,0],frankapos_vals[:,1],frankapos_vals[:,2],frankapos_vals[:,3],frankapos_vals[:,4],frankapos_vals[:,5],frankapos_vals[:,6]])
         
-        root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/imu_mcp_fusion2')
+        root = os.path.join('~/franka-datacollect-ws-ros-mcp/src/automatecamspkg/src/outputs/skins-test')
         filaname = 'fibrescope-'+time.strftime("%d-%b-%Y--%H-%M-%S")+'.csv'
         
         df = pd.DataFrame(np.transpose(save_arr), columns=header)
