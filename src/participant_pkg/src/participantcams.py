@@ -22,7 +22,7 @@ num = None
 
 # define constant parameters - in CAPS
 FPS = 10.0 # 10 fps
-TOT_FRAMES = int(FPS*60) # 10 fps, 60 secs (1 min) long recording
+TOT_FRAMES = int(FPS*30) # 10 fps, 30 secs long recording
 # TOT_FRAMES = int(FPS*5) # 5 secs
 DESIREDWIDTH = 640
 DESIREDHEIGHT = 480

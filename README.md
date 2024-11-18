@@ -132,7 +132,7 @@ Polaris pubisher and subscriber
 ```
 rosrun polaris_pkg object_tracking 169.254.158.253 --tools=<path of rom file> # run polaris publisher package
 
-rosrun participant_pkg participantcams.py <participant_num> <motion_type> # run subscribers
+rosrun participant_pkg participantcams.py <participant_num> <motion_type> # run subscribers, motion: pitch | roll | trans
 
 # to test just the polaris subscriber: 
 rosrun participant_pkg trial2_polaris_sub # subscriber for only polaris
