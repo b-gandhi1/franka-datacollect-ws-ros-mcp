@@ -10,3 +10,5 @@ logs/automatecamspkg/build.symlink.log
 mcp_env2
 VideoCapture-0.9-5
 src/participant_pkg/src/outputs
+arduinocode/imu-ard
+arduinocode/imu-ard-gyro-tests
