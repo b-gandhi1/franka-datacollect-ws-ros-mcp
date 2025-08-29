@@ -130,7 +130,7 @@ ros2 launch motionmannequin motionmannequin.launch.py robot_ip:=dont_care use_fa
 Polaris pubisher and subscriber
  
 ```
-rosrun polaris_pkg object_tracking 169.254.158.253 --tools=<path of rom file> # run polaris publisher package
+rosrun polaris_pkg object_tracking 192.168.1.10 --tools=<path of rom file> # run polaris publisher package
 
 rosrun participant_pkg participantcams.py <participant_num> <motion_type> # run subscribers, motion: pitch | roll | trans
 

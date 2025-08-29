@@ -338,6 +338,7 @@ int main(int argc, char *argv[])
 					<< "    [args]          (optional) Any other arguments such as tools to load, or SCU to connect to." << std::endl
 					<< "example hostnames:" << std::endl
 					<< "    Connecting to device by IP address: 169.254.8.50" << std::endl
+					// << "Connecting to device by IP address: 192.168.1.10" << std::endl
 					<< "    Connecting to device by hostname: P9-B0103.local" << std::endl
 					<< "    Connecting to serial port varies by operating system:" << std::endl
 					<< "        COM10 (Windows), /dev/ttyUSB0 (Linux), /dev/cu.usbserial-001014FA (Mac)" << std::endl

@@ -1,5 +1,8 @@
 {
     "python.defaultInterpreterPath": "/usr/bin/python3", // solves the issue of missing imports for intellisense!!
     // use pylance 
-    "python.languageServer": "Pylance" // Jedi gets rid of errors but does not work with intellisense at all for any of the libraries. 
+    "python.languageServer": "Pylance",
+    "files.associations": {
+        "ostream": "cpp"
+    } // Jedi gets rid of errors but does not work with intellisense at all for any of the libraries. 
 }
